@@ -1,0 +1,10 @@
+celery==5.2.7
+redis==4.4.0
+Flask==2.2.2
+flower==1.2.0
+flask-celeryext==0.5.0
+pytest
+gunicorn
+python-dotenv==1.0.0
+scikit-learn
+ray==2.4.0
