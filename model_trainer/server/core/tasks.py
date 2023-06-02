@@ -1,6 +1,5 @@
 import json 
 
-from model_trainer.worker.tasks.train_anomaly_detector import train_anomaly_detector
 from ray.job_submission import JobSubmissionClient, JobStatus
 from model_trainer.config import Config
 
