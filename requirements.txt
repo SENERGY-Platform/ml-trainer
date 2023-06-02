@@ -8,3 +8,4 @@ gunicorn
 python-dotenv==1.0.0
 scikit-learn
 ray==2.4.0
+ksql==0.10.2

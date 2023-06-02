@@ -1,16 +1,19 @@
 import os
 print(f"Number of CPUs in this system: {os.cpu_count()}")
-import json 
+from copy import deepcopy
 
 import ray
 from ray import air, tune
 from ray.air.integrations.mlflow import MLflowLoggerCallback
-import mlflow
+from ray.air import session
+
 from toolbox.estimation import pipelines
-from train import train
-from db import store_model
+from train import fit_and_evaluate_model
+from splitter import Splitter
 
 MLFLOW_URL = os.environ['MLFLOW_URL']
+
+# Detect already running ray on node
 ray.init(address="auto", ignore_reinit_error=True)
 
 def load_hyperparams(pipeline_name):
@@ -23,10 +26,33 @@ def load_hyperparams(pipeline_name):
     
     return ray_params
 
-def tune_model(hyperparams, experiment_name):
+def train(config, ts):
+    splitter = Splitter()
+    train_ts, test_ts = splitter.single_split(ts)
+    
+    # Make a deep copy which can be passed to the model 
+    # So that original config will be logged by ray and nothing is missing
+    config_copy = deepcopy(config)
+    
+    pipeline, metrics = fit_and_evaluate_model(train_ts, test_ts, config_copy)
+    
+    # Define a model checkpoint using AIR API.
+    # https://docs.ray.io/en/latest/tune/tutorials/tune-checkpoints.html
+    checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
+        {"model": pipeline}
+    )
+
+    # Save checkpoint and report back metrics, using ray.air.session.report()
+    # The metrics you specify here will appear in Tune summary table.
+    # They will also be recorded in Tune results under `metrics`.
+    
+    # MlFlow call back will automatically save hyperparameter, metrics and checkpoints
+    session.report(metrics, checkpoint=checkpoint)
+
+def tune_model(hyperparams, experiment_name, ts):
     # Define a tuner object.
     tuner = tune.Tuner(
-            train,
+            tune.with_parameters(train, ts=ts),
             param_space=hyperparams,
             run_config=air.RunConfig(
                 name="tune_model",
