@@ -22,20 +22,12 @@ RUN pip install -r /requirements.txt
 
 WORKDIR /app
 COPY model_trainer model_trainer
-COPY app.py app.py
-COPY ./build/wait_for_db.sh /wait_for_db.sh
-RUN chmod +x /wait_for_db.sh
 
 ENTRYPOINT ["/entrypoint"]
 
 FROM builder AS api
 WORKDIR /app
 COPY ./build/start_api.sh /entrypoint
-RUN chmod +x /entrypoint
-
-FROM builder AS worker
-WORKDIR /app
-COPY ./build/start_worker.sh /entrypoint
 RUN chmod +x /entrypoint
 
 FROM builder AS test 

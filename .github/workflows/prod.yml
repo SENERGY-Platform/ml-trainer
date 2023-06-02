@@ -33,6 +33,7 @@ jobs:
           context: .
           file: ./build/Dockerfile
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          target: api
           push: true
           tags: |
             ghcr.io/senergy-platform/ml-trainer:prod
