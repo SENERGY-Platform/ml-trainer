@@ -1,4 +1,6 @@
 import json 
+import os
+from os.path import join as pjoin
 
 from ray.job_submission import JobSubmissionClient, JobStatus
 from model_trainer.config import Config
@@ -20,15 +22,15 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
             entrypoint="python select_best_model.py",
             # Path to the local directory that contains the script.py file
             runtime_env={
-                "working_dir": config.TASK_WORKING_DIR, 
+                "working_dir": pjoin(os.getcwd(), "model_trainer", "tasks"), 
                 "pip": ["mlflow", "darts"],
                 "env_vars": env_vars
             }
     )
     return job_id
 
-def select_job(task, models, user_id, experiment_name, model_artifcat_name):
-    envs = {"MODELS": ';'.join(models)}
+def select_job(task, models, user_id, experiment_name, model_artifcat_name, data):
+    envs = {"MODELS": ';'.join(models), 'KAFKA_TOPIC_CONFIG': json.dumps(data)}
     return start_job(task, user_id, experiment_name, model_artifcat_name, envs)
 
 def get_job_status(job_id):

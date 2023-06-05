@@ -1,5 +1,6 @@
 Flask==2.2.2
 pytest
+pytest-mock
 gunicorn
 python-dotenv==1.0.0
 scikit-learn

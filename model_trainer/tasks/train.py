@@ -1,6 +1,3 @@
-import os
-print(f"Number of CPUs in this system: {os.cpu_count()}")
-
 import ray
 import mlflow
 from toolbox.estimation import pipelines

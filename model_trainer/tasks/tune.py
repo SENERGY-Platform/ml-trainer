@@ -1,5 +1,3 @@
-import os
-print(f"Number of CPUs in this system: {os.cpu_count()}")
 from copy import deepcopy
 
 import ray
@@ -10,8 +8,6 @@ from ray.air import session
 from toolbox.estimation import pipelines
 from train import fit_and_evaluate_model
 from splitter import Splitter
-
-MLFLOW_URL = os.environ['MLFLOW_URL']
 
 # Detect already running ray on node
 ray.init(address="auto", ignore_reinit_error=True)
@@ -49,7 +45,7 @@ def train(config, ts):
     # MlFlow call back will automatically save hyperparameter, metrics and checkpoints
     session.report(metrics, checkpoint=checkpoint)
 
-def tune_model(hyperparams, experiment_name, ts):
+def tune_model(hyperparams, experiment_name, ts, config):
     # Define a tuner object.
     tuner = tune.Tuner(
             tune.with_parameters(train, ts=ts),
@@ -60,8 +56,8 @@ def tune_model(hyperparams, experiment_name, ts):
                 verbose=2,
                 callbacks=[
                     MLflowLoggerCallback(
-                        tracking_uri=MLFLOW_URL,
-                        registry_uri=MLFLOW_URL,
+                        tracking_uri=config.MLFLOW_URL,
+                        registry_uri=config.MLFLOW_URL,
                         experiment_name=experiment_name,
                         save_artifact=True,
                     )

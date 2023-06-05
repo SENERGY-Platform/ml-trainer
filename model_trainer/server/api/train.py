@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-from celery.result import AsyncResult
 
 from model_trainer.server.core.tasks import get_job_status, select_job
 
@@ -13,7 +12,8 @@ def start_select():
     task = request_data['task']
     model_artifact_name = request_data['model_artifact_name']
     experiment_name = request_data['experiment_name']
-    task_id = select_job(task, models, user_id, experiment_name, model_artifact_name)
+    data = request_data['kafka_topic_config']
+    task_id = select_job(task, models, user_id, experiment_name, model_artifact_name, data)
     return jsonify({'task_id': str(task_id), 'status': 'Processing'})
 
 @train_blueprint.route('/train/<job_id>', methods=['GET'])

@@ -1,24 +1,21 @@
-import os
-print(f"Number of CPUs in this system: {os.cpu_count()}")
 import json 
 from copy import deepcopy
 
 import ray
 import mlflow
-from ray import air, tune
-from ray.air.integrations.mlflow import setup_mlflow
 
 from tune import tune_model, load_hyperparams
 from train import fit_and_evaluate_model
-from data import DataLoader
+from data.kafka.kafka import KafkaLoader
 from db import store_model
 from splitter import Splitter
+from config import Config
 
 @ray.remote
-def evaluate_model_and_hyperparams(hyperparams, experiment_name, train_ts):
-    return tune_model(hyperparams, experiment_name, train_ts)
+def evaluate_model_and_hyperparams(hyperparams, experiment_name, train_ts, config):
+    return tune_model(hyperparams, experiment_name, train_ts, config)
 
-def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction):
+def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction, config):
     jobs = []
     best_config_per_model = {}
     job_id_to_model = {}
@@ -29,7 +26,7 @@ def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_
         hyperparams = load_hyperparams(model)
         hyperparams['freq'] = 'H'
         hyperparams['pipeline'] = model
-        job_id = evaluate_model_and_hyperparams.remote(hyperparams, experiment_name, train_ts)   
+        job_id = evaluate_model_and_hyperparams.remote(hyperparams, experiment_name, train_ts, config)   
         jobs.append(job_id)
         job_id_to_model[job_id] = model
 
@@ -82,7 +79,6 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
         tuning_result = ray.get(result_id)
         model_metrics, model_checkpoint, model_config = tuning_result
         model_metric_value = model_metrics[selection_metric]
-        print(model_metric_value)
 
         if (not best_metric_value) or \
             (metric_direction == 'min' and model_metric_value < best_metric_value) or \
@@ -93,25 +89,27 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
 
     return best_metric_value, best_checkpoint, best_config
 
-if __name__ == '__main__':
-    MLFLOW_URL = os.environ['MLFLOW_URL']
-    mlflow.set_tracking_uri(MLFLOW_URL)
-    
-    models = os.environ['MODELS'].split(';')
-    user_id = os.environ['USER_ID']
-    task = os.environ['TASK']
-    experiment_name = os.environ['EXPERIMENT_NAME']
-    model_artifcat_name = os.environ['MODEL_ARTIFACT_NAME']
-    selection_metric = os.environ.get('METRIC_FOR_SELECTION', 'mae') 
-    metric_direction = os.environ.get("METRIC_DIRECTION", "min")
-
-    dataloader = DataLoader()
+def create_dataloader(config):
+    dataloader = KafkaLoader(config.KSQL_SERVER, config.KAFKA_TOPIC_CONFIG)
+    dataloader.connect()
     dataloader.load_data()
+
+if __name__ == '__main__':
+    config = Config()
+    mlflow.set_tracking_uri(config.MLFLOW_URL)
     
+    models = config.MODELS
+    task = config.TASK
+    experiment_name = config.EXPERIMENT_NAME
+    selection_metric = config.METRIC_FOR_SELECTION 
+    metric_direction = config.METRIC_DIRECTION
+
+    dataloader = create_dataloader(config)
+
     splitter = Splitter()
     train_ts, test_ts = splitter.single_split(dataloader.get_data())
 
-    best_config_per_model = run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction)
+    best_config_per_model = run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction, config)
     print(f'Best configs per model: {best_config_per_model}')
 
     # TODO train again on complete train ts and test against test_ts 
@@ -119,7 +117,7 @@ if __name__ == '__main__':
     print(f'Best value: {best_metric_value}, Best config: {best_config}')
 
     # Store best model checkpoint
-    model_id = store_model(best_checkpoint, user_id, best_config['pipeline'], experiment_name, model_artifcat_name, task)
+    model_id = store_model(best_checkpoint, config.USER_ID, best_config['pipeline'], experiment_name, config.MODEL_ARTIFACT_NAME, task)
     
     result = {
         'best_model_id': model_id,
