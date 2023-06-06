@@ -1,7 +1,7 @@
 FROM python:3.8.16 AS builder
 
 WORKDIR /app
-RUN apt-get -y install libc-dev libssl-dev 
+RUN apt-get -y install libc-dev libssl-dev
 
 RUN python -m venv /opt/venv
 # Make sure we use the virtualenv:
@@ -17,6 +17,8 @@ COPY .git .git
 RUN git log -1 --oneline > version.txt
 
 FROM python:3.8.16-alpine3.18 AS api
+RUN apk add --no-cache libstdc++
+
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
