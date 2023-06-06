@@ -5,7 +5,7 @@ from config import KafkaTopicConfiguration
 
 class KafkaLoader():
     def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration):
-       self.stream_name = "data10"
+       self.stream_name = "data14"
        self.topic_config = topic_config
        self.ksql_server_url = ksql_server_url
 
@@ -66,7 +66,8 @@ class KafkaLoader():
 
         try:
             result = self.client.query(self.build_select_query())
-            result_list = [item for item in result]
+            for item in result:
+                result_list.append(item)
         except Exception as e:
             print(type(e))
             print('Iteration done')
@@ -77,7 +78,7 @@ class KafkaLoader():
         result = result[1:-2]
         rows = []
         for row in result:
-            print(row)
+            print(type(row))
             values = row['row']['columns']
             time = values[0]
             value = values[1]

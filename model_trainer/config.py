@@ -10,7 +10,6 @@ class Config:
     TESTING = environ.get("TESTING", 'false') == 'true'
     MLFLOW_URL = environ['MLFLOW_URL'] 
     RAY_CLUSTER_URL = environ['RAY_CLUSTER_URL'] 
-    TASK_WORKING_DIR = environ['TASK_WORKING_DIR']
     KSQL_SERVER_URL = environ['KSQL_SERVER_URL']
 
     
