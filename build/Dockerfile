@@ -25,18 +25,17 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 WORKDIR /app
 
+# make entrypoint executable as root
+COPY ./build/start_api.sh /entrypoint
+RUN chmod u+x /entrypoint
+
 RUN adduser app --disabled-password
 USER app
 
 COPY --from=builder /opt/venv /opt/venv
-COPY ./build/start_api.sh /entrypoint
 COPY --from=builder /app/model_trainer /app/
 COPY --from=builder /app/version.txt /app/ 
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
-
-USER root
-RUN chmod u+x /entrypoint
-USER app
 
 FROM builder AS test 
 ENV TESTING True
