@@ -5,24 +5,18 @@ import typing
 import json
 
 @dataclass
-class Mapping():
-    dest: str = None
-    source: str = None
-
-@dataclass
 class KafkaTopicConfiguration:
     """"""
     name: str = None
     filterType: str = None
     filterValue: str = None
-    mappings: typing.List[Mapping] = None
+    path_to_time: str = None
+    path_to_value: str = None
 
-    def __post_init__(self):
-        self.mappings = [Mapping(m) for m in self.mappings]
 
 class Config:
     """Base config."""
-    KSQL_SERVER = environ.get("KSQL_SERVER", "https://localhost:8088")
+    KSQL_SERVER_URL = environ["KSQL_SERVER_URL"]
     MLFLOW_URL = environ['MLFLOW_URL']
     MODELS = environ['MODELS']
     EXPERIMENT_NAME = environ['EXPERIMENT_NAME']

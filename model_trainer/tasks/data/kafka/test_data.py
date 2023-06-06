@@ -1,7 +1,7 @@
 from .kafka import KafkaLoader
-from .models import KafkaConfiguration
+from config import KafkaTopicConfiguration
 
-data_config = KafkaConfiguration(**{"mappings": '{"src": "src", "dest": "dest"}'})
+data_config = KafkaTopicConfiguration()
 
 def test_flatten_string(mocker):
     l = KafkaLoader(data_config)

@@ -23,14 +23,14 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
             # Path to the local directory that contains the script.py file
             runtime_env={
                 "working_dir": pjoin(os.getcwd(), "model_trainer", "tasks"), 
-                "pip": ["mlflow", "darts"],
+                "pip": ["mlflow", "darts", "ksql"],
                 "env_vars": env_vars
             }
     )
     return job_id
 
 def select_job(task, models, user_id, experiment_name, model_artifcat_name, data):
-    envs = {"MODELS": ';'.join(models), 'KAFKA_TOPIC_CONFIG': json.dumps(data)}
+    envs = {"MODELS": ';'.join(models), 'KAFKA_TOPIC_CONFIG': json.dumps(data), 'KSQL_SERVER_URL': config.KSQL_SERVER_URL}
     return start_job(task, user_id, experiment_name, model_artifcat_name, envs)
 
 def get_job_status(job_id):
