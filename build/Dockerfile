@@ -16,8 +16,6 @@ RUN python3 -m pip install -Ur requirements.txt
 COPY . .
 RUN git log -1 --oneline > version.txt
 
-ENTRYPOINT ["/entrypoint"]
-
 FROM python:3.8.16-alpine3.18 AS api
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONUNBUFFERED 1
@@ -36,9 +34,12 @@ COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app/model_trainer /app/
 COPY --from=builder /app/version.txt /app/ 
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
+ENTRYPOINT ["/entrypoint"]
 
 FROM builder AS test 
 ENV TESTING True
 ENV DEBUG True
 COPY ./build/run_tests.sh /entrypoint
 RUN chmod +x /entrypoint
+ENTRYPOINT ["/entrypoint"]
+
