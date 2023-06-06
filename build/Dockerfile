@@ -13,7 +13,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN python3 -m pip install -Ur requirements.txt
 
-COPY . .
+COPY .git .git
 RUN git log -1 --oneline > version.txt
 
 FROM python:3.8.16-alpine3.18 AS api
@@ -24,22 +24,22 @@ ENV PYTHONDONTWRITEBYTECODE 1
 WORKDIR /app
 
 # make entrypoint executable as root
-COPY ./build/start_api.sh /entrypoint
-RUN chmod +x /entrypoint
+COPY ./build/start_api.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 RUN adduser app --disabled-password
 USER app
 
 COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /app/model_trainer /app/
+COPY model_trainer /app/model_trainer
 COPY --from=builder /app/version.txt /app/ 
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
-ENTRYPOINT ["/entrypoint"]
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 
 FROM builder AS test 
 ENV TESTING True
 ENV DEBUG True
-COPY ./build/run_tests.sh /entrypoint
-RUN chmod +x /entrypoint
-ENTRYPOINT ["/entrypoint"]
+COPY ./build/run_tests.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["sh", "/entrypoint.sh"]
 
