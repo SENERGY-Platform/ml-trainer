@@ -25,7 +25,7 @@ WORKDIR /app
 
 # make entrypoint executable as root
 COPY ./build/start_api.sh /entrypoint
-RUN chmod u+x /entrypoint
+RUN chmod +x /entrypoint
 
 RUN adduser app --disabled-password
 USER app
