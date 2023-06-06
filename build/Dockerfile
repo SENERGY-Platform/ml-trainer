@@ -16,7 +16,7 @@ RUN python3 -m pip install -Ur requirements.txt
 COPY .git .git
 RUN git log -1 --oneline > version.txt
 
-FROM python:3.8.16-alpine3.18 AS api
+FROM python:3.8.16-slim-bullseye AS api
 RUN apk add --no-cache libstdc++
 
 ENV PATH="/opt/venv/bin:$PATH"
