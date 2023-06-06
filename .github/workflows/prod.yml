@@ -32,7 +32,7 @@ jobs:
         with:
           context: .
           file: ./build/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/x86_64
+          platforms: linux/amd64,linux/arm64
           target: api
           push: true
           tags: |

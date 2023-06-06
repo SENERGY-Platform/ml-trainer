@@ -17,7 +17,6 @@ COPY .git .git
 RUN git log -1 --oneline > version.txt
 
 FROM python:3.8.16-slim-bullseye AS api
-RUN apk add --no-cache libstdc++
 
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONUNBUFFERED 1
