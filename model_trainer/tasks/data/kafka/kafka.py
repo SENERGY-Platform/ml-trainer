@@ -72,6 +72,7 @@ class KafkaLoader():
             print(type(e))
             print('Iteration done')
         self.data = self.convert_result_to_dataframe(result_list)
+        self.client.ksql(f'DROP STREAM {self.stream_name}')
     
     def convert_result_to_dataframe(self, result):
         # Strip off first and last info messages
