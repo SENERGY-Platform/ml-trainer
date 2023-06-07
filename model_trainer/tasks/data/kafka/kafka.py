@@ -4,8 +4,8 @@ import pandas as pd
 from config import KafkaTopicConfiguration
 
 class KafkaLoader():
-    def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration):
-       self.stream_name = "data14"
+    def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):
+       self.stream_name = experiment_name
        self.topic_config = topic_config
        self.ksql_server_url = ksql_server_url
 

@@ -90,7 +90,7 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
     return best_metric_value, best_checkpoint, best_config
 
 def create_dataloader(config):
-    dataloader = KafkaLoader(config.KSQL_SERVER_URL, config.KAFKA_TOPIC_CONFIG)
+    dataloader = KafkaLoader(config.KSQL_SERVER_URL, config.KAFKA_TOPIC_CONFIG, config.EXPERIMENT_NAME)
     dataloader.connect()
     dataloader.load_data()
     return dataloader

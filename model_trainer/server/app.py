@@ -37,7 +37,8 @@ def before():
         values += key + ': ' + request.values[key] + ', '
     app.logger.debug(values)
 
-    app.logger.debug(f'data: {request.json}')
+    if request.content_type == "application/json":
+        app.logger.debug(f'data: {request.json}')
 
 # Useful debugging interceptor to log all endpoint responses
 @app.after_request
