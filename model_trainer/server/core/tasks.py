@@ -23,7 +23,9 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
             # Path to the local directory that contains the script.py file
             runtime_env={
                 "working_dir": config.TASK_WORKING_DIR, 
-                "pip": ["mlflow", "darts", "ksql"],
+
+                # openssl>22.1.0 for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
+                "pip": ["mlflow", "darts", "openssl>22.1.0", "ksql"], 
                 "env_vars": env_vars
             }
     )
