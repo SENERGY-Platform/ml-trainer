@@ -25,7 +25,7 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
                 "working_dir": config.TASK_WORKING_DIR, 
 
                 # openssl>22.1.0 for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
-                "pip": ["mlflow", "darts", "openssl>22.1.0", "ksql"], 
+                "pip": ["mlflow", "darts", "cryptography==38.0.4", "ksql"], 
                 "env_vars": env_vars
             }
     )
