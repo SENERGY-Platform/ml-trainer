@@ -22,7 +22,7 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
             entrypoint="python select_best_model.py",
             # Path to the local directory that contains the script.py file
             runtime_env={
-                "working_dir": pjoin(os.getcwd(), "model_trainer", "tasks"), 
+                "working_dir": config.TASK_WORKING_DIR, 
                 "pip": ["mlflow", "darts", "ksql"],
                 "env_vars": env_vars
             }
