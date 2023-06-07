@@ -3,7 +3,7 @@ from ksql import KSQLAPI
 import os
 import json
 
-class DataLoader():
+class DummyLoader():
     def __init__(self):
         self.data = None
 

@@ -7,6 +7,7 @@ import mlflow
 from tune import tune_model, load_hyperparams
 from train import fit_and_evaluate_model
 from data.kafka.kafka import KafkaLoader
+from data.dummy import DummyLoader
 from db import store_model
 from splitter import Splitter
 from config import Config
@@ -90,8 +91,9 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
     return best_metric_value, best_checkpoint, best_config
 
 def create_dataloader(config):
-    dataloader = KafkaLoader(config.KSQL_SERVER_URL, config.KAFKA_TOPIC_CONFIG, config.EXPERIMENT_NAME)
-    dataloader.connect()
+    #dataloader = KafkaLoader(config.KSQL_SERVER_URL, config.KAFKA_TOPIC_CONFIG, config.EXPERIMENT_NAME)
+    #dataloader.connect()
+    dataloader = DummyLoader()
     dataloader.load_data()
     return dataloader
 
