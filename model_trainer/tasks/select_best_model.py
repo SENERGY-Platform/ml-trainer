@@ -58,7 +58,7 @@ def train_model(config, train_ts, test_ts, experiment_name):
 
     # TODO mlflow tracking here 
     experiment = mlflow.get_experiment_by_name(experiment_name)
-    run_name = f"{config_copy.pipeline} - with optimized hyperparameters"
+    run_name = f"{config_copy['pipeline']} - with optimized hyperparameters"
     with mlflow.start_run(run_name=run_name, experiment_id=experiment.experiment_id):
         mlflow.log_metrics(metrics)
         mlflow.log_params(config)
