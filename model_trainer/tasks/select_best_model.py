@@ -49,7 +49,7 @@ def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_
     return best_config_per_model
 
 @ray.remote
-def train_model(config, train_ts, test_ts, experiment_name):
+def train_model(config, train_ts, test_ts, experiment_name, pipeline_name):
     config_copy = deepcopy(config)
     pipeline, metrics = fit_and_evaluate_model(train_ts, test_ts, config_copy)
     checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
@@ -58,7 +58,7 @@ def train_model(config, train_ts, test_ts, experiment_name):
 
     # TODO mlflow tracking here 
     experiment = mlflow.get_experiment_by_name(experiment_name)
-    run_name = f"{config_copy['pipeline']} - with optimized hyperparameters"
+    run_name = f"{pipeline_name} - with optimized hyperparameters"
     with mlflow.start_run(run_name=run_name, experiment_id=experiment.experiment_id):
         mlflow.log_metrics(metrics)
         mlflow.log_params(config)
@@ -73,7 +73,7 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
 
     # Run Hyperparametey Tuning for all models on Train TimeSeries
     for model in models:
-        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts, experiment_name)   
+        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts, experiment_name, model)   
         jobs.append(job_id)
 
     # Fetch and print the results of the tasks in the order that they complete.

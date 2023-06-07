@@ -32,18 +32,17 @@ def train(config, ts):
     
     pipeline, metrics = fit_and_evaluate_model(train_ts, test_ts, config_copy)
     
-    # Define a model checkpoint using AIR API.
-    # https://docs.ray.io/en/latest/tune/tutorials/tune-checkpoints.html
-    checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
-        {"model": pipeline}
-    )
+    # Define a model checkpoint -> add to session.report - right now not needed 
+    #checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
+    #    {"model": pipeline}
+    #)
 
     # Save checkpoint and report back metrics, using ray.air.session.report()
     # The metrics you specify here will appear in Tune summary table.
     # They will also be recorded in Tune results under `metrics`.
     
     # MlFlow call back will automatically save hyperparameter, metrics and checkpoints
-    session.report(metrics, checkpoint=checkpoint)
+    session.report(metrics)
 
 def tune_model(hyperparams, experiment_name, ts, config):
     # Define a tuner object.
