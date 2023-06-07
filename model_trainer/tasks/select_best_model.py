@@ -49,7 +49,7 @@ def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_
     return best_config_per_model
 
 @ray.remote
-def train_model(config, train_ts, test_ts):
+def train_model(config, train_ts, test_ts, experiment_name):
     config_copy = deepcopy(config)
     pipeline, metrics = fit_and_evaluate_model(train_ts, test_ts, config_copy)
     checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
@@ -57,11 +57,15 @@ def train_model(config, train_ts, test_ts):
     )
 
     # TODO mlflow tracking here 
-    mlflow.log_metric()
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    run_name = f"{config_copy.pipeline} - with optimized hyperparameters"
+    with mlflow.start_run(run_name=run_name, experiment_id=experiment.experiment_id):
+        mlflow.log_metrics(metrics)
+        mlflow.log_params(config)
 
     return metrics, checkpoint, config
 
-def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric):
+def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_name):
     jobs = []
     best_metric_value = None
     best_checkpoint = None
@@ -69,7 +73,7 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
 
     # Run Hyperparametey Tuning for all models on Train TimeSeries
     for model in models:
-        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts)   
+        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts, experiment_name)   
         jobs.append(job_id)
 
     # Fetch and print the results of the tasks in the order that they complete.
@@ -116,7 +120,7 @@ if __name__ == '__main__':
     print(f'Best configs per model: {best_config_per_model}')
 
     # TODO train again on complete train ts and test against test_ts 
-    best_metric_value, best_checkpoint, best_config = train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric)
+    best_metric_value, best_checkpoint, best_config = train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_name)
     print(f'Best value: {best_metric_value}, Best config: {best_config}')
 
     # Store best model checkpoint
