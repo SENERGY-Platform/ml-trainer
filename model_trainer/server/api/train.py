@@ -11,7 +11,10 @@ def start_select():
     models = request_data['models']
     task = request_data['task']
     model_artifact_name = request_data['model_artifact_name']
+
+    # TODO check if experiment_name is not deleted
     experiment_name = request_data['experiment_name']
+
     data = request_data['kafka_topic_config']
     task_id = select_job(task, models, user_id, experiment_name, model_artifact_name, data)
     return jsonify({'task_id': str(task_id), 'status': 'Processing'})
