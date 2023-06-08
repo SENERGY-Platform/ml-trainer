@@ -30,8 +30,9 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
 
                 # Pin pip and python version to find the packages specified above 
                 "pip_version": "==22.0.4;python_version=='3.8.16'",
-                "env_vars": env_vars
-            }
+                "env_vars": env_vars,
+            },
+            entrypoint_num_cpus=2
     )
     return job_id
 
