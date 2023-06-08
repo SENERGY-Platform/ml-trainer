@@ -1,11 +1,12 @@
 from ksql import KSQLAPI
 import pandas as pd 
+import uuid
 
 from config import KafkaTopicConfiguration
 
 class KafkaLoader():
     def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):
-       self.stream_name = experiment_name
+       self.stream_name = f'{experiment_name}-{str(uuid.uuid4())}'
        self.topic_config = topic_config
        self.ksql_server_url = ksql_server_url
 

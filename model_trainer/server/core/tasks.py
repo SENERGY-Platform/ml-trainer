@@ -26,7 +26,8 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
 
                 # TODO changes are not applied on running cluster??
                 # cryptography for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
-                "pip": ["mlflow==2.4.0", "darts", "cryptography==38.0.4", "ksql"], 
+                "pip": ["mlflow==2.4.0", "darts==0.24.0", "cryptography==38.0.4", "ksql"], 
+                "pip_version": "==22.0.4;python_version=='3.8.16'"
                 "env_vars": env_vars
             }
     )
