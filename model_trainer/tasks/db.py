@@ -10,7 +10,7 @@ def store_model(checkpoint, userid, model_type, experiment, model_artifact_name,
     run_relative_artifcat_path = 'models'
 
     # Create a new model version and save model
-    with mlflow.start_run(run_name="final-train") as run:
+    with mlflow.start_run(run_name="store-best-model") as run:
         mlflow.pyfunc.log_model(
             artifact_path=run_relative_artifcat_path,
             python_model=model_artifact,

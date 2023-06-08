@@ -24,8 +24,9 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
             runtime_env={
                 "working_dir": config.TASK_WORKING_DIR, 
 
-                # openssl>22.1.0 for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
-                "pip": ["mlflow", "darts", "cryptography==38.0.4", "ksql"], 
+                # TODO changes are not applied on running cluster??
+                # cryptography for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
+                "pip": ["mlflow==2.4.0", "darts", "cryptography==38.0.4", "ksql"], 
                 "env_vars": env_vars
             }
     )
