@@ -1,3 +1,8 @@
+import os
+import sys
+print(f"Current working directory: {os.getcwd()}")
+print(f"Sys Path: {sys.path}")
+
 import logging 
 
 from flask import Flask, request, jsonify

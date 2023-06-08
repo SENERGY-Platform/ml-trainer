@@ -1,12 +1,16 @@
 version: '3.8'
 
 services:
-  api:
+  model-trainer-api:
     build:
       context: ..
       dockerfile: build/Dockerfile 
       target: api
-    image: api
+    image: model-trainer-api
     ports:
       - 5000:5000
+    environment:
+      - MLFLOW_URL=https://mlflow:5000
+      - RAY_CLUSTER_URL=https://ray:8265
+      - KSQL_SERVER_URL=https://ksql:8088
 

@@ -34,6 +34,8 @@ USER app
 COPY --from=builder /opt/venv /opt/venv
 COPY model_trainer /app/model_trainer
 COPY --from=builder /app/version.txt /app/ 
+ENV PATH_COMMIT_VERSION=/app/version.txt
+
 HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
 ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 

@@ -1,9 +1,8 @@
 import json 
-import os
-from os.path import join as pjoin
 
 from ray.job_submission import JobSubmissionClient, JobStatus
 from model_trainer.config import Config
+from model_trainer.versioning import get_commit
 
 config = Config()
 client = JobSubmissionClient(config.RAY_CLUSTER_URL)
@@ -14,7 +13,8 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
         "TASK": task,
         "USER_ID": user_id,
         "EXPERIMENT_NAME": experiment_name,
-        "MODEL_ARTIFACT_NAME": model_artifcat_name
+        "MODEL_ARTIFACT_NAME": model_artifcat_name,
+        "COMMIT": get_commit(config.PATH_COMMIT_VERSION)
     }
     env_vars.update(envs)
     job_id = client.submit_job(
@@ -27,6 +27,8 @@ def start_job(task, user_id, experiment_name, model_artifcat_name, envs):
                 # TODO changes are not applied on running cluster??
                 # cryptography for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
                 "pip": ["mlflow==2.4.0", "darts==0.24.0", "cryptography==38.0.4", "ksql"], 
+
+                # Pin pip and python version to find the packages specified above 
                 "pip_version": "==22.0.4;python_version=='3.8.16'",
                 "env_vars": env_vars
             }

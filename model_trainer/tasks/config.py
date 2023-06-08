@@ -26,6 +26,7 @@ class Config:
     USER_ID = environ['USER_ID']
     TASK = environ['TASK']
     KAFKA_TOPIC_CONFIG = environ['KAFKA_TOPIC_CONFIG']
+    COMMIT = environ['COMMIT']
 
     def __init__(self):
         self.MODELS = self.MODELS.split(';')

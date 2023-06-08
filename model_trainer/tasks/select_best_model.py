@@ -125,7 +125,7 @@ if __name__ == '__main__':
     print(f'Best value: {best_metric_value}, Best config: {best_config}')
 
     # Store best model checkpoint
-    model_id = store_model(best_checkpoint, config.USER_ID, best_config['pipeline'], experiment_name, config.MODEL_ARTIFACT_NAME, task)
+    model_id = store_model(best_checkpoint, config.USER_ID, best_config, experiment_name, config.MODEL_ARTIFACT_NAME, task, config.COMMIT)
     
     result = {
         'best_model_id': model_id,
