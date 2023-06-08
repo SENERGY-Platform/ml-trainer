@@ -12,3 +12,7 @@ class Baseline(mlflow.pyfunc.PythonModel):
         
     def predict(self, number_steps):
         return self.model.predict(number_steps)
+
+    @staticmethod
+    def get_hyperparams():
+        return {}
