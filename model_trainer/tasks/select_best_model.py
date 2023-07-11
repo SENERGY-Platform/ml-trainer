@@ -3,70 +3,40 @@ from copy import deepcopy
 
 import ray
 import mlflow
+from darts import TimeSeries
 
-from tune import tune_model, load_hyperparams
 from train import fit_and_evaluate_model
+from tune import run_hyperparameter_tuning_for_each_model
 from data.kafka.kafka import KafkaLoader
 from data.dummy import DummyLoader
 from db import store_model
 from splitter import Splitter
 from config import Config
+from plot import log_plot
 
-@ray.remote
-def evaluate_model_and_hyperparams(hyperparams, experiment_name, train_ts, config):
-    return tune_model(hyperparams, experiment_name, train_ts, config)
+# Each training will reserve 1 CPU
+@ray.remote(num_cpus=1)
+def train_model(config, train_ts, test_ts, experiment_id, pipeline_name, mlflow_url):
+    # Setup correct MLFLOW URL
+    mlflow.set_tracking_uri(mlflow_url)
 
-def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction, config):
-    jobs = []
-    best_config_per_model = {}
-    job_id_to_model = {}
-
-    # Run Hyperparametey Tuning for all models on Train TimeSeries
-    for model in models:
-        print(f'Start Hyperparamter Tuning for {model}')
-        hyperparams = load_hyperparams(model)
-        hyperparams['freq'] = 'H'
-        hyperparams['pipeline'] = model
-        job_id = evaluate_model_and_hyperparams.remote(hyperparams, experiment_name, train_ts, config)   
-        jobs.append(job_id)
-        job_id_to_model[job_id] = model
-
-    # Fetch and print the results of the tasks in the order that they complete.
-    while jobs:
-        # Use ray.wait to get the object ref of the first task that completes.
-        done_ids, jobs = ray.wait(jobs)
-        result_id = done_ids[0]
-        model = job_id_to_model[result_id]
-        tuning_result = ray.get(result_id)
-        print(tuning_result)
-        
-        best_model_result = tuning_result.get_best_result(selection_metric, metric_direction)
-        best_config_per_model[model] = best_model_result.config
-        
-        #best_metric_value_per_model[model] = best_model_result.metrics[selection_metric]
-        #best_checkpoint_per_model[model] = best_model_result.checkpoint
-
-    return best_config_per_model
-
-@ray.remote
-def train_model(config, train_ts, test_ts, experiment_name, pipeline_name):
     config_copy = deepcopy(config)
-    pipeline, metrics = fit_and_evaluate_model(train_ts, test_ts, config_copy)
+    pipeline, metrics, pred_ts = fit_and_evaluate_model(train_ts, test_ts, config_copy)
     checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
         {"model": pipeline}
     )
 
-    # TODO mlflow tracking here 
-    experiment = mlflow.get_experiment_by_name(experiment_name)
+    # Log to MLFLOW
     run_name = f"{pipeline_name} - with optimized hyperparameters"
     mlflow.end_run()
-    with mlflow.start_run(experiment_id=experiment.experiment_id, run_name=run_name):
+    with mlflow.start_run(experiment_id=experiment_id, run_name=run_name):
         mlflow.log_metrics(metrics)
         mlflow.log_params(config)
+        log_plot(test_ts, pred_ts, mlflow)
 
     return metrics, checkpoint, config
 
-def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_name):
+def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_id, mlflow_url):
     jobs = []
     best_metric_value = None
     best_checkpoint = None
@@ -74,7 +44,7 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
 
     # Run Hyperparametey Tuning for all models on Train TimeSeries
     for model in models:
-        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts, experiment_name, model)   
+        job_id = train_model.remote(best_config_per_model[model], train_ts, test_ts, experiment_id, model, mlflow_url)   
         jobs.append(job_id)
 
     # Fetch and print the results of the tasks in the order that they complete.
@@ -95,37 +65,44 @@ def train_best_models_and_test(models, best_config_per_model, train_ts, test_ts,
 
     return best_metric_value, best_checkpoint, best_config
 
-def create_dataloader(config):
-    #dataloader = KafkaLoader(config.KSQL_SERVER_URL, config.KAFKA_TOPIC_CONFIG, config.EXPERIMENT_NAME)
-    #dataloader.connect()
-    dataloader = DummyLoader()
+def create_dataloader():
+    dataloader = KafkaLoader(Config.KSQL_SERVER_URL, Config.KAFKA_TOPIC_CONFIG, Config.EXPERIMENT_NAME)
+    dataloader.connect()
+    #dataloader = DummyLoader()
     dataloader.load_data()
     return dataloader
 
+def create_experiment(exp_name):
+    experiment_id = mlflow.create_experiment(exp_name)
+    return experiment_id
+
 if __name__ == '__main__':
-    config = Config()
-    mlflow.set_tracking_uri(config.MLFLOW_URL)
+    mlflow.set_tracking_uri(Config.MLFLOW_URL)
     
-    models = config.MODELS
-    task = config.TASK
-    experiment_name = config.EXPERIMENT_NAME
-    selection_metric = config.METRIC_FOR_SELECTION 
-    metric_direction = config.METRIC_DIRECTION
+    models = Config.MODELS
+    task = Config.TASK
+    experiment_name = Config.EXPERIMENT_NAME
+    selection_metric = Config.METRIC_FOR_SELECTION 
+    metric_direction = Config.METRIC_DIRECTION
+    experiment_id = create_experiment(experiment_name)
 
-    dataloader = create_dataloader(config)
-
+    dataloader = create_dataloader()
+    data_df = dataloader.get_data()
+    print(data_df)
+    
+    ts = TimeSeries.from_dataframe(data_df, time_col="time", value_cols="value")
     splitter = Splitter()
-    train_ts, test_ts = splitter.single_split(dataloader.get_data())
+    train_ts, test_ts = splitter.single_split(ts)
 
-    best_config_per_model = run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction, config)
+    best_config_per_model = run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction)
     print(f'Best configs per model: {best_config_per_model}')
 
     # TODO train again on complete train ts and test against test_ts 
-    best_metric_value, best_checkpoint, best_config = train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_name)
+    best_metric_value, best_checkpoint, best_config = train_best_models_and_test(models, best_config_per_model, train_ts, test_ts, metric_direction, selection_metric, experiment_id, Config.MLFLOW_URL)
     print(f'Best value: {best_metric_value}, Best config: {best_config}')
 
     # Store best model checkpoint
-    model_id = store_model(best_checkpoint, config.USER_ID, best_config, experiment_name, config.MODEL_ARTIFACT_NAME, task, config.COMMIT)
+    model_id = store_model(best_checkpoint, Config.USER_ID, best_config, experiment_name, Config.MODEL_ARTIFACT_NAME, task, Config.COMMIT)
     
     result = {
         'best_model_id': model_id,

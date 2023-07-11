@@ -1,92 +1,66 @@
+import uuid
+import json 
+from collections import defaultdict
+
 from ksql import KSQLAPI
 import pandas as pd 
-import uuid
-
+from ksql_query_builder import Builder, SelectContainer, CreateContainer
 from config import KafkaTopicConfiguration
 
 class KafkaLoader():
     def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):
-       self.stream_name = f'{experiment_name}-{str(uuid.uuid4())}'
+       self.stream_name = f'{experiment_name}{str(uuid.uuid4().hex)}'
        self.topic_config = topic_config
        self.ksql_server_url = ksql_server_url
+       self.builder = Builder()
 
     def connect(self):
         self.client = KSQLAPI(self.ksql_server_url)
-
-    def build_flatten_string(self, access_path):
-        string = ""
-        access_paths = access_path.split('.')
-        for i, level in enumerate(access_paths):
-            string += level
-
-            if i < len(access_paths)-1:
-                string += '->'
-        return string
-
-    def build_select_query(self):
-        flattened_time_path = self.build_flatten_string(self.topic_config.path_to_time)
-        flattened_value_path = self.build_flatten_string(self.topic_config.path_to_value)
-
-        query = f"""
-        SELECT {flattened_time_path} as time, {flattened_value_path} as value
-        FROM {self.stream_name}
-        """
-
-        #WHERE device_id == {self.topic_config.filterValue}
-        print(query)
-        return query
-
-    def build_column_string(self, access_path):
-        string = ""
-        access_paths = access_path.split('.')
-        for i, level in enumerate(access_paths):
-            string += level
-
-            if i < len(access_paths)-1:
-                string += ' STRUCT<'
-
-        string += " DOUBLE"
-        
-        for _ in range(len(access_paths)-1):
-            string += ">"
-
-        return string
-
+    
     def create_stream(self):
-        value_string = self.build_column_string(self.topic_config.path_to_value)
-        time_string = self.build_column_string(self.topic_config.path_to_time)
-
-        query = f"""CREATE STREAM {self.stream_name} ({value_string}, {time_string})
-        WITH (kafka_topic='{self.topic_config.name}', value_format='json', partitions=1);"""
-        print(query)
+        create_containers = [CreateContainer(path=self.topic_config.path_to_time, type="STRING"), CreateContainer(self.topic_config.path_to_value, type="DOUBLE"), CreateContainer("device_id", type="STRING")]
+        query = self.builder.build_create_stream_query(self.stream_name, self.topic_config.name, create_containers)
         self.client.ksql(query)
 
     def load_data(self):
         self.create_stream()
         result_list = []
 
+        select_containers = [SelectContainer(column_name="time", path=self.topic_config.path_to_time), SelectContainer(column_name="value", path=self.topic_config.path_to_value)]
+
         try:
-            result = self.client.query(self.build_select_query())
+            select_query = self.builder.build_select_query(self.stream_name, select_containers)
+            select_query += "WHERE device_id = '{self.topic_config.filterValue}'"
+
+            result = self.client.query()
             for item in result:
-                result_list.append(item)
+                result_list.append(item)    
         except Exception as e:
-            print(type(e))
+            print(e)
             print('Iteration done')
-        self.data = self.convert_result_to_dataframe(result_list)
+        
+        data = self.clean_ksql_response(result_list)
+        self.data = self.convert_result_to_dataframe(data)
         self.client.ksql(f'DROP STREAM {self.stream_name}')
-    
-    def convert_result_to_dataframe(self, result):
+
+    def clean_ksql_response(self, response):
         # Strip off first and last info messages
-        result = result[1:-2]
+        data = []
+        response = response[1:-1]
+        for item in response:
+            item = item.replace(",\n", "")
+            item = json.loads(item)
+            data.append(item)
+        return data 
+
+    def convert_result_to_dataframe(self, result):
         rows = []
         for row in result:
-            print(type(row))
             values = row['row']['columns']
             time = values[0]
             value = values[1]
             rows.append({'time': time, 'value': value})
         df = pd.DataFrame(rows)
-        print(df)
         return df
 
     def get_data(self):
