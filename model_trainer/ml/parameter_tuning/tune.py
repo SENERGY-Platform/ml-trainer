@@ -1,23 +1,18 @@
 from copy import deepcopy
-import uuid 
 
 import mlflow
 import ray
 from ray import air, tune
-from ray.air.integrations.mlflow import setup_mlflow, MLflowLoggerCallback
+from ray.air.integrations.mlflow import MLflowLoggerCallback
 from ray.air import session
-import matplotlib.pyplot as plt 
 
-
-from toolbox.estimation import pipelines
-from train import fit_and_evaluate_model
-from splitter import Splitter
+from data.splitter.splitter import Splitter
 from config import Config
 
 # Detect already running ray on node
 ray.init(address="auto", ignore_reinit_error=True)
 
-def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_ts, metric_direction):
+def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_data, metric_direction, task, frequency):
     # TODO: Multiple Tune jobs on one cluster are not supported yet, as Tune takes all cluster ressources
     #jobs = []
     #job_id_to_model = {}
@@ -26,12 +21,13 @@ def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_
     # Run Hyperparametey Tuning for all models on Train TimeSeries
     for model in models:
         print(f'Start Hyperparamter Tuning for {model}')
-        hyperparams = load_hyperparams(model)
-        hyperparams['freq'] = 'H'
+        hyperparams = load_hyperparams(model, task, train_data)
         hyperparams['pipeline'] = model
+        hyperparams['freq'] = frequency
 
-        tuning_result = tune_model(hyperparams, experiment_name, train_ts)   
+        tuning_result = tune_model(hyperparams, experiment_name, train_data, task)   
         best_model_result = tuning_result.get_best_result(selection_metric, metric_direction)
+        print(best_model_result)
         best_config_per_model[model] = best_model_result.config
         
         #best_metric_value_per_model[model] = best_model_result.metrics[selection_metric]
@@ -52,9 +48,8 @@ def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_
         
     return best_config_per_model
 
-def load_hyperparams(pipeline_name):
-    model = getattr(pipelines, pipeline_name)
-    hyperparams = model.get_hyperparams()
+def load_hyperparams(pipeline_name, task, train_data):
+    hyperparams = task.get_pipeline_hyperparams(pipeline_name, train_data)
     ray_params = {}
 
     for param, values in hyperparams.items():
@@ -62,22 +57,21 @@ def load_hyperparams(pipeline_name):
     
     return ray_params
 
-def train(config, ts=None, mlflow_url=None):
-    try:
-        mlflow.set_tracking_uri(mlflow_url)
+def train(config, data=None, mlflow_url=None, task=None):
+    # Train a model with specific parameters and test on validation set
 
-        # Setup MLFlow to use correct Server
-        #mlflow_config['run_name'] = str(uuid.uuid4())
-        #setup_mlflow(**mlflow_config)
+    #mlflow.set_tracking_uri(mlflow_url)
+    # Setup MLFlow to use correct Server
+    #mlflow_config['run_name'] = str(uuid.uuid4())
+    #setup_mlflow(**mlflow_config)
 
-        splitter = Splitter()
-        train_ts, test_ts = splitter.single_split(ts)
+    train_data, validation_data = task.split_data(data)
         
-        # Make a deep copy which can be passed to the model 
-        # So that original config will be logged by ray and nothing is missing
-        config_copy = deepcopy(config)
+    # Make a deep copy which can be passed to the model 
+    # So that original config will be logged by ray and nothing is missing
+    config_copy = deepcopy(config)
         
-        pipeline, metrics, pred_ts = fit_and_evaluate_model(train_ts, test_ts, config_copy)
+    _, metrics, _ = task.fit_and_evaluate_model(train_data, validation_data, config_copy)
         
         # Log plots TODO not working, artifacts are not added to the trial run but to a completly new run in default
         # test_ts.plot(label="expected")
@@ -90,16 +84,13 @@ def train(config, ts=None, mlflow_url=None):
         #)
         
         # MlFlow call back will automatically save hyperparameter, metrics and checkpoints
-        session.report(metrics)
-
-    except Exception as e:
-        raise Exception(str(e))
+    session.report(metrics)
 
 #@ray.remote
-def tune_model(hyperparams, experiment_name, ts):
+def tune_model(hyperparams, experiment_name, data, task):
     # Define a tuner object.
     tuner = tune.Tuner(
-            tune.with_parameters(train, ts=ts, mlflow_url=Config.MLFLOW_URL),
+            tune.with_parameters(train, data=data, mlflow_url=Config.MLFLOW_URL, task=task),
             param_space=hyperparams,
             run_config=air.RunConfig(
                 name="tune_model",

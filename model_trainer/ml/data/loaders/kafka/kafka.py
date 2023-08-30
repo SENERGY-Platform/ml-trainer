@@ -18,21 +18,30 @@ class KafkaLoader():
         self.client = KSQLAPI(self.ksql_server_url)
     
     def create_stream(self):
-        create_containers = [CreateContainer(path=self.topic_config.path_to_time, type="STRING"), CreateContainer(self.topic_config.path_to_value, type="DOUBLE"), CreateContainer("device_id", type="STRING")]
+        create_containers = [
+            CreateContainer(path=self.topic_config.path_to_time, type="STRING"), 
+            CreateContainer(path=self.topic_config.path_to_value, type="DOUBLE"), 
+            CreateContainer(path="device_id", type="STRING")
+        ]
         query = self.builder.build_create_stream_query(self.stream_name, self.topic_config.name, create_containers)
+        print(query)
         self.client.ksql(query)
 
     def load_data(self):
         self.create_stream()
         result_list = []
 
-        select_containers = [SelectContainer(column_name="time", path=self.topic_config.path_to_time), SelectContainer(column_name="value", path=self.topic_config.path_to_value)]
+        select_containers = [
+            SelectContainer(column_name="time", path=self.topic_config.path_to_time), 
+            SelectContainer(column_name="value", path=self.topic_config.path_to_value)
+        ]
 
         try:
             select_query = self.builder.build_select_query(self.stream_name, select_containers)
-            select_query += "WHERE device_id = '{self.topic_config.filterValue}'"
+            select_query += f" WHERE {self.topic_config.filterType} = '{self.topic_config.filterValue}'"
+            print(select_query)
 
-            result = self.client.query()
+            result = self.client.query(select_query)
             for item in result:
                 result_list.append(item)    
         except Exception as e:
@@ -41,7 +50,12 @@ class KafkaLoader():
         
         data = self.clean_ksql_response(result_list)
         self.data = self.convert_result_to_dataframe(data)
-        self.client.ksql(f'DROP STREAM {self.stream_name}')
+        if self.data.empty:
+            raise Exception("DataFrame is empty. Check the query.")
+
+        drop_stream_query = f'DROP STREAM {self.stream_name}' 
+        print(drop_stream_query)
+        self.client.ksql(drop_stream_query)
 
     def clean_ksql_response(self, response):
         # Strip off first and last info messages

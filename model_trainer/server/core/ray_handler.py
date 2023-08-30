@@ -27,9 +27,17 @@ class RayHandler():
                 runtime_env={
                     "working_dir": self.config.TASK_WORKING_DIR, 
 
-                    # TODO changes are not applied on running cluster??
+                    # environments are only recreate when something changes, with out version, it will not load the latest version
                     # cryptography for ksql error module 'lib' has no attribute 'OpenSSL_add_all_algorithms'
-                    "pip": ["mlflow==2.4.0", "darts==0.24.0", "cryptography==38.0.4", "ksql", "git+https://github.com/SENERGY-Platform/ksql-query-builder"], 
+                    "pip": [
+                        "mlflow==2.5.0", 
+                        "darts==0.24.0", 
+                        "cryptography==38.0.4", 
+                        "ksql==0.10.2", 
+                        "git+https://github.com/SENERGY-Platform/ksql-query-builder",
+                        "git+https://github.com/SENERGY-Platform/timeseries-toolbox",
+                        "python-dotenv==1.0.0",
+                    ], 
 
                     # Pin pip and python version to find the packages specified above 
                     "pip_version": "==22.0.4;python_version=='3.8.16'",
@@ -51,8 +59,13 @@ class RayHandler():
             result = json.loads(result)
         return status, result
 
-    def find_best_model(self, task, models, user_id, experiment_name, model_artifcat_name, data):
-        envs = {"MODELS": ';'.join(models), 'KAFKA_TOPIC_CONFIG': json.dumps(data), 'KSQL_SERVER_URL': self.config.KSQL_SERVER_URL}
+    def find_best_model(self, task, models, user_id, experiment_name, model_artifcat_name, data, task_settings):
+        envs = {
+            "MODELS": ';'.join(models), 
+            'DATA_SETTINGS': json.dumps(data), 
+            'KSQL_SERVER_URL': self.config.KSQL_SERVER_URL,
+            "TASK_SETTINGS": json.dumps(task_settings)
+        }
         return self.start_job(task, user_id, experiment_name, model_artifcat_name, envs)
 
 
