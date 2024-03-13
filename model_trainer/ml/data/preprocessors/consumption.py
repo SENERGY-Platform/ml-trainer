@@ -4,6 +4,7 @@ import numpy as np
 from data.preprocessors.time_series import TimeSeriesPreprocessor
 
 class ConsumptionPreProcessor(TimeSeriesPreprocessor):
+    # Used for cummulative energy consumption data
     def __init__(self, data_df, frequency) -> None:
         self.data_df = data_df
         self.frequency = frequency

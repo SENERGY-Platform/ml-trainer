@@ -4,6 +4,7 @@ import mlflow.pyfunc
 def store_model(checkpoint, userid, config, experiment, model_artifact_name, task, commit):
     print('store model')
     model_artifact = checkpoint.to_dict()['model']
+    print(model_artifact.quantil)
 
     mlflow.end_run()
     mlflow.set_experiment(experiment)
@@ -13,8 +14,7 @@ def store_model(checkpoint, userid, config, experiment, model_artifact_name, tas
     with mlflow.start_run(run_name="store-best-model") as run:
         mlflow.pyfunc.log_model(
             artifact_path=run_relative_artifcat_path,
-            python_model=model_artifact,
-            registered_model_name=model_artifact_name
+            python_model=model_artifact
         )
     
     model_uri = f"runs:/{run.info.run_id}/{run_relative_artifcat_path}"

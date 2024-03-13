@@ -16,8 +16,11 @@ def start_select():
     models = request_data['models']
     task = request_data['task']
     model_artifact_name = request_data['model_artifact_name']
-    data = request_data['data_settings']
+    data_settings = request_data['data_settings']
+    data_source = request_data['data_source']
     task_settings = request_data['task_settings']
+    preprocessor_name = request_data['preprocessor']
+    metric_for_selection = request_data['selection_metric']
 
     if 'experiment_name' not in request_data:
         experiment_name = str(uuid.uuid4().hex)
@@ -31,7 +34,18 @@ def start_select():
         return jsonify({'error': reason})
 
     ray_handler = RayHandler(config)
-    task_id = ray_handler.find_best_model(task, models, user_id, experiment_name, model_artifact_name, data, task_settings)
+    task_id = ray_handler.find_best_model(
+        task, 
+        models, 
+        user_id, 
+        experiment_name, 
+        model_artifact_name, 
+        data_settings, 
+        task_settings, 
+        data_source, 
+        preprocessor_name,
+        metric_for_selection
+    )
     return jsonify({'task_id': str(task_id), 'status': 'Processing'})
 
 @train_blueprint.route('/train/<job_id>', methods=['GET'])

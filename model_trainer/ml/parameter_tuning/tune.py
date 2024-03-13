@@ -12,7 +12,15 @@ from config import Config
 # Detect already running ray on node
 ray.init(address="auto", ignore_reinit_error=True)
 
-def run_hyperparameter_tuning_for_each_model(models, experiment_name, selection_metric, train_data, metric_direction, task, frequency):
+def run_hyperparameter_tuning_for_each_model(
+    models, 
+    experiment_name, 
+    selection_metric, 
+    train_data, 
+    metric_direction, 
+    task, 
+    frequency
+    ):
     # TODO: Multiple Tune jobs on one cluster are not supported yet, as Tune takes all cluster ressources
     #jobs = []
     #job_id_to_model = {}
@@ -82,8 +90,6 @@ def train(config, data=None, mlflow_url=None, task=None):
         #checkpoint = ray.air.checkpoint.Checkpoint.from_dict(
         #    {"model": pipeline}
         #)
-        
-        # MlFlow call back will automatically save hyperparameter, metrics and checkpoints
     session.report(metrics)
 
 #@ray.remote
@@ -100,7 +106,7 @@ def tune_model(hyperparams, experiment_name, data, task):
                     tracking_uri=Config.MLFLOW_URL,
                     experiment_name=experiment_name,
                     save_artifact=True,
-            )]
+                )]
             )
     )
 

@@ -1,8 +1,8 @@
 from .consumption import ConsumptionPreProcessor
 from .time_series import TimeSeriesPreprocessor
 
-def get_preprocessor(processor_name):
+def get_preprocessor(processor_name, data, frequency):
     if processor_name == "diff":
-        return ConsumptionPreProcessor
+        return ConsumptionPreProcessor(data, frequency)
     else:
-        return TimeSeriesPreprocessor
+        return TimeSeriesPreprocessor(data, frequency)

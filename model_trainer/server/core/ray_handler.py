@@ -35,13 +35,16 @@ class RayHandler():
                         "cryptography==38.0.4", 
                         "ksql==0.10.2", 
                         "git+https://github.com/SENERGY-Platform/ksql-query-builder",
-                        "git+https://github.com/SENERGY-Platform/timeseries-toolbox",
+                        "git+https://github.com/SENERGY-Platform/timeseries-toolbox@v1.16",
                         "python-dotenv==1.0.0",
                     ], 
 
                     # Pin pip and python version to find the packages specified above 
                     "pip_version": "==22.0.4;python_version=='3.8.16'",
                     "env_vars": env_vars,
+
+                    # exclude .env in the task directory as it shall only be used for local testing
+                    "excludes": [".env"]
                 },
 
                 # Run entrypoint script on a node with >2 CPUS so that Head Node (1 CPU) does not get jobs
@@ -59,12 +62,27 @@ class RayHandler():
             result = json.loads(result)
         return status, result
 
-    def find_best_model(self, task, models, user_id, experiment_name, model_artifcat_name, data, task_settings):
+    def find_best_model(
+        self, 
+        task, 
+        models, 
+        user_id, 
+        experiment_name, 
+        model_artifcat_name, 
+        data, 
+        task_settings, 
+        data_source, 
+        preprocessor_name,
+        metric_for_selection
+    ):
         envs = {
             "MODELS": ';'.join(models), 
             'DATA_SETTINGS': json.dumps(data), 
+            'DATA_SOURCE': data_source,
             'KSQL_SERVER_URL': self.config.KSQL_SERVER_URL,
-            "TASK_SETTINGS": json.dumps(task_settings)
+            "TASK_SETTINGS": json.dumps(task_settings),
+            "PREPROCESSOR": preprocessor_name,
+            "METRIC_FOR_SELECTION": metric_for_selection
         }
         return self.start_job(task, user_id, experiment_name, model_artifcat_name, envs)
 

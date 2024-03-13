@@ -6,13 +6,15 @@ from ksql import KSQLAPI
 import pandas as pd 
 from ksql_query_builder import Builder, SelectContainer, CreateContainer
 from config import KafkaTopicConfiguration
+from data.loaders.loader import DataLoader
 
-class KafkaLoader():
+class KafkaLoader(DataLoader):
     def __init__(self, ksql_server_url, topic_config: KafkaTopicConfiguration, experiment_name):
        self.stream_name = f'{experiment_name}{str(uuid.uuid4().hex)}'
        self.topic_config = topic_config
        self.ksql_server_url = ksql_server_url
        self.builder = Builder()
+       self.connect()
 
     def connect(self):
         self.client = KSQLAPI(self.ksql_server_url)
@@ -27,7 +29,7 @@ class KafkaLoader():
         print(query)
         self.client.ksql(query)
 
-    def load_data(self):
+    def get_data(self):
         self.create_stream()
         result_list = []
 
@@ -56,6 +58,7 @@ class KafkaLoader():
         drop_stream_query = f'DROP STREAM {self.stream_name}' 
         print(drop_stream_query)
         self.client.ksql(drop_stream_query)
+        return self.data
 
     def clean_ksql_response(self, response):
         # Strip off first and last info messages
@@ -76,6 +79,3 @@ class KafkaLoader():
             rows.append({'time': time, 'value': value})
         df = pd.DataFrame(rows)
         return df
-
-    def get_data(self):
-        return self.data

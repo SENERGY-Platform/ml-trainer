@@ -14,6 +14,7 @@ class KafkaTopicConfiguration:
     filterValue: str = None
     path_to_time: str = None
     path_to_value: str = None
+    experiment_name: str = None
 
 @dataclass
 class EstimationSettings:
@@ -37,28 +38,20 @@ class Config:
     TASK = environ['TASK']
     COMMIT = environ['COMMIT']
     MODELS = environ['MODELS'].split(';')
+    DATA_SOURCE = environ['DATA_SOURCE']
+    PREPROCESSOR = environ['PREPROCESSOR']
     
-    # TODO
-    #DATA_SOURCE = environ['DATA_SOURCE']
-    #PREPROCESSOR = environ['PREPROCESSOR']
-
     def __init__(self) -> None:
         self.parse_data_settings()
         self.parse_task_settings()
 
     def parse_data_settings(self):
-        data_options = [KafkaTopicConfiguration]
-
-        for opt in data_options:
-            try:
-                self.DATA_SETTINGS = opt(**json.loads(environ['DATA_SETTINGS']))
-            except TypeError:
-                continue
-
+        if self.DATA_SOURCE == 'kafka':
+            self.DATA_SETTINGS = KafkaTopicConfiguration(**json.loads(environ['DATA_SETTINGS']))
+            
     def parse_task_settings(self):
-        task_options = [AnomalySettings, EstimationSettings]
-        for opt in task_options:
-            try:
-                self.TASK_SETTINGS = opt(**json.loads(environ['TASK_SETTINGS']))
-            except TypeError:
-                continue
+        task_settings = json.loads(environ['TASK_SETTINGS'])
+        if self.TASK == "anomaly":
+            self.TASK_SETTINGS = AnomalySettings(**task_settings)
+        elif self.TASK == "estimation":
+            self.TASK_SETTINGS = EstimationSettings(**task_settings)
