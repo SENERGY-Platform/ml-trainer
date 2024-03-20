@@ -31,26 +31,27 @@ class Config:
     KSQL_SERVER_URL = environ["KSQL_SERVER_URL"]
     MLFLOW_URL = environ['MLFLOW_URL']
     EXPERIMENT_NAME = environ.get('EXPERIMENT_NAME', str(uuid.uuid4().hex))
-    MODEL_ARTIFACT_NAME = environ['MODEL_ARTIFACT_NAME']
+    MODEL_ARTIFACT_NAME = environ.get('MODEL_ARTIFACT_NAME')
     METRIC_FOR_SELECTION = environ.get('METRIC_FOR_SELECTION', 'mae')
     METRIC_DIRECTION = environ.get('METRIC_DIRECTION', 'min')
     USER_ID = environ['USER_ID']
-    TASK = environ['TASK']
+    TASK = environ.get('TASK')
     COMMIT = environ['COMMIT']
-    MODELS = environ['MODELS'].split(';')
+    MODELS = environ.get('MODELS','').split(';')
     DATA_SOURCE = environ['DATA_SOURCE']
-    PREPROCESSOR = environ['PREPROCESSOR']
+    PREPROCESSOR = environ.get('PREPROCESSOR')
     
     def __init__(self) -> None:
         self.parse_data_settings()
-        self.parse_task_settings()
+        if environ.get('TASK_SETTINGS'):
+            self.parse_task_settings(environ.get('TASK_SETTINGS'))
 
     def parse_data_settings(self):
         if self.DATA_SOURCE == 'kafka':
             self.DATA_SETTINGS = KafkaTopicConfiguration(**json.loads(environ['DATA_SETTINGS']))
             
-    def parse_task_settings(self):
-        task_settings = json.loads(environ['TASK_SETTINGS'])
+    def parse_task_settings(self, task_settings):
+        task_settings = json.loads(task_settings)
         if self.TASK == "anomaly":
             self.TASK_SETTINGS = AnomalySettings(**task_settings)
         elif self.TASK == "estimation":

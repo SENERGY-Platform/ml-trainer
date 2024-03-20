@@ -9,20 +9,18 @@ class RayHandler():
         self.config = config
         self.client = JobSubmissionClient(config.RAY_CLUSTER_URL)
 
-    def start_job(self, task, user_id, experiment_name, model_artifcat_name, additional_envs):
+    def start_job(self, user_id, experiment_name, additional_envs, entrypoint_file):
         env_vars = {
             "MLFLOW_URL": self.config.MLFLOW_URL,
-            "TASK": task,
             "USER_ID": user_id,
             "EXPERIMENT_NAME": experiment_name,
-            "MODEL_ARTIFACT_NAME": model_artifcat_name,
             "COMMIT": get_commit(self.config.PATH_COMMIT_VERSION)
         }
         env_vars.update(additional_envs)
 
         job_id = self.client.submit_job(
                 # Entrypoint shell command to execute
-                entrypoint="python select_best_model.py",
+                entrypoint=f"python {entrypoint_file}.py",
                 # Path to the local directory that contains the script.py file
                 runtime_env={
                     "working_dir": self.config.TASK_WORKING_DIR, 
@@ -82,8 +80,10 @@ class RayHandler():
             'KSQL_SERVER_URL': self.config.KSQL_SERVER_URL,
             "TASK_SETTINGS": json.dumps(task_settings),
             "PREPROCESSOR": preprocessor_name,
-            "METRIC_FOR_SELECTION": metric_for_selection
+            "METRIC_FOR_SELECTION": metric_for_selection,
+            "TASK": task,
+            "MODEL_ARTIFACT_NAME": model_artifcat_name,
         }
-        return self.start_job(task, user_id, experiment_name, model_artifcat_name, envs)
+        return self.start_job(user_id, experiment_name, envs, 'select_best_model')
 
 

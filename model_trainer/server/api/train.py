@@ -1,3 +1,4 @@
+import json 
 import uuid 
 
 from flask import Blueprint, jsonify, request
@@ -57,3 +58,29 @@ def get_task_status(job_id):
         response['response'] = return_value
     return jsonify(response)
     
+@train_blueprint.route('/loadshifting', methods=['POST'])
+def loadshifting():
+    request_data = request.get_json()
+    user_id = "user"
+    data_settings = request_data['data_settings']
+    data_source = request_data['data_source']
+
+    if 'experiment_name' not in request_data:
+        experiment_name = str(uuid.uuid4().hex)
+    else:
+        experiment_name = request_data['experiment_name']
+
+    mlflow_handler = MlflowHandler(config)
+    experiment_can_be_used, reason = mlflow_handler.experiment_name_can_be_used(experiment_name)
+
+    if not experiment_can_be_used:
+        return jsonify({'error': reason})
+
+    ray_handler = RayHandler(config)
+    envs = {
+        'DATA_SETTINGS': json.dumps(data_settings), 
+        'DATA_SOURCE': data_source,
+        'KSQL_SERVER_URL': config.KSQL_SERVER_URL,
+    }
+    task_id = ray_handler.start_job(user_id, experiment_name, envs, 'load_shifting')
+    return jsonify({'task_id': str(task_id), 'status': 'Processing'})
