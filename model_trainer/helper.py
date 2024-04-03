@@ -1,5 +1,5 @@
 import pytest
-from model_trainer.server import app
+from model_trainer.app import app
 from model_trainer.config import Config
 
 @pytest.fixture()

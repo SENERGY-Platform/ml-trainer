@@ -1,7 +1,5 @@
-BINARY_NAME=model-trainer
-
 run_api: 
-	python -m flask --app model_trainer/server/app run --port=5001
+	python -m flask --app model_trainer/app run --port=5001
 
 run_tests:
 	pytest

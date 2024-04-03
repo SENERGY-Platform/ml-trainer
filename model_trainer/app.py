@@ -8,7 +8,7 @@ import logging
 from flask import Flask, request, jsonify
 
 from model_trainer.config import Config
-from model_trainer.server.api.train import train_blueprint
+from model_trainer.model_trainer.api import train_blueprint
 
 def create_app():
     # instantiate the app
