@@ -1,6 +1,6 @@
 import uuid 
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 
 from model_trainer.ray_handler import RayKubeJobHandler
 from model_trainer.mlflow_handler import MlflowHandler
@@ -68,5 +68,6 @@ def loadshifting():
     try:
         task_id = ray_handler.start_load_shifting_job(user_id, experiment_name, data_settings, ray_image)
         return jsonify({'task_id': str(task_id), 'status': 'Processing'})
-    except:
-        return jsonify({'error': 'could not start job', 'message': ''})
+    except Exception as e:
+        current_app.logger.error("Could not start job: " + e)
+        return jsonify({'error': 'could not start job', 'message': e})
