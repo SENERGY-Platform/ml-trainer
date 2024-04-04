@@ -37,8 +37,8 @@ pip:
     - mlflow==2.5.0 
     - cryptography==38.0.4 
     - ksql==0.10.2 
-    - "git+https://github.com/SENERGY-Platform/ksql-query-builder"
-    - "git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.1"
+    - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder"
+    - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.1"
     - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
                     "rayVersion": "2.9.0",
