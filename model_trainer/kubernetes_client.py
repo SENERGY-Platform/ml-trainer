@@ -124,7 +124,3 @@ pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
             print(api_response)
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)
-
-
-c = KubernetesAPIClient()
-c.create_job({}, "test")
