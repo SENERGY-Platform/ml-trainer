@@ -2,7 +2,7 @@ import uuid
 
 from flask import Blueprint, jsonify, request
 
-from model_trainer.ray_handler import RayHandler, RayKubeJobHandler
+from model_trainer.ray_handler import RayKubeJobHandler
 from model_trainer.mlflow_handler import MlflowHandler
 from model_trainer.config import Config
 
@@ -33,20 +33,20 @@ def start_select():
     if not experiment_can_be_used:
         return jsonify({'error': reason})
 
-    ray_handler = RayHandler(config)
-    task_id = ray_handler.find_best_model(
-        task, 
-        models, 
-        user_id, 
-        experiment_name, 
-        model_artifact_name, 
-        data_settings, 
-        task_settings, 
-        data_source, 
-        preprocessor_name,
-        metric_for_selection
-    )
-    return jsonify({'task_id': str(task_id), 'status': 'Processing'})
+    #ray_handler = RayHandler(config)
+    #task_id = ray_handler.find_best_model(
+    #    task, 
+    #    models, 
+    #    user_id, 
+    #    experiment_name, 
+    #    model_artifact_name, 
+    #    data_settings, 
+    #    task_settings, 
+    #    data_source, 
+    #    preprocessor_name,
+    #    metric_for_selection
+    #)
+    return jsonify({'task_id': str("task_id"), 'status': 'Processing'})
 
 @train_blueprint.route('/train/<job_id>', methods=['GET'])
 def get_task_status(job_id):
