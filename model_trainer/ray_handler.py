@@ -14,7 +14,8 @@ class RayKubeJobHandler():
             'TASK': "load_shifting",
             'USER': user_id,
             'EXPERIMENT_NAME': experiment_name + str(uuid.uuid4().hex),
-            'DATA_SETTINGS': data_settings
+            'DATA_SETTINGS': data_settings,
+            'DATA_SOURCE': "s3"
         }
         self.k8sclient.create_job(envs)
 
