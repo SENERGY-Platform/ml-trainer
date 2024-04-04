@@ -19,7 +19,7 @@ class KubernetesAPIClient():
             env_string += f"{env}: \"{value}\""
         return env_string 
 
-    def create_job(self, envs, job_name):
+    def create_job(self, envs, job_name, ray_image):
         env_string = self.create_env_string(envs)
         data = {
             "apiVersion": "ray.io/v1",
@@ -44,7 +44,7 @@ pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
                                 "containers": [
                                 {
                                     "name": "ray-head",
-                                    "image": "ghcr.io/senergy-platform/ray:v0.0.1",
+                                    "image": ray_image,
                                     "ports": [
                                     {
                                         "containerPort": 6379,
