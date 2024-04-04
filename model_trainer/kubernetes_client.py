@@ -118,9 +118,10 @@ pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
         group = 'ray.io' # str | The custom resource's group name
         version = 'v1' # str | The custom resource's version
         plural = 'rayjobs' # str | The custom resource's plural name. For TPRs this would be lowercase plural kind.
-
+        namespace = 'trainer' # must be same namespace, otherwise RBAC will complain
         try:
-            api_response = api_instance.create_namespaced_custom_object(group=group, version=version, plural=plural, body=data, namespace="ray")
+            api_response = api_instance.create_namespaced_custom_object(group=group, version=version, plural=plural, body=data, namespace=namespace)
             print(api_response)
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)
+            raise(e)
