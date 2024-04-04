@@ -4,20 +4,17 @@ import uuid
 from ray.job_submission import JobSubmissionClient, JobStatus
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.versioning import get_commit
-from model_trainer.config import Config
 
 class RayKubeJobHandler():
     def __init__(self, config):
-        self.config = config
         self.k8sclient = KubernetesAPIClient()
     
-    def start_load_shifting_job(self, experiment_name, user_id):
-        config = Config()
+    def start_load_shifting_job(self, experiment_name, user_id, data_settings):
         envs = {
-            'S3_URL': config.S3_URL,
             'TASK': "load_shifting",
             'USER': user_id,
-            'EXPERIMENT_NAME': experiment_name + str(uuid.uuid4().hex)
+            'EXPERIMENT_NAME': experiment_name + str(uuid.uuid4().hex),
+            'DATA_SETTINGS': data_settings
         }
         self.k8sclient.create_job(envs)
 
