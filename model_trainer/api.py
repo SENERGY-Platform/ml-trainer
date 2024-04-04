@@ -63,5 +63,8 @@ def loadshifting():
     request_data = request.get_json()
     experiment_name = request_data['experiment_name'] 
     ray_handler = RayKubeJobHandler(config)
-    task_id = ray_handler.start_load_shifting_job(user_id, experiment_name)
-    return jsonify({'task_id': str(task_id), 'status': 'Processing'})
+    try:
+        task_id = ray_handler.start_load_shifting_job(user_id, experiment_name)
+        return jsonify({'task_id': str(task_id), 'status': 'Processing'})
+    except:
+        return jsonify({'error': 'could not start job', 'message': ''})
