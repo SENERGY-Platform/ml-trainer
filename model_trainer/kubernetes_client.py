@@ -17,7 +17,7 @@ class KubernetesAPIClient():
     def create_env_string(self, envs): 
         env_string = ""
         for env, value in envs.items():
-            env_string += f"{env}: \"{value}\"\n\t"
+            env_string += f"{env}: \"{value}\"\n  "
         return env_string 
 
     def create_job(self, envs, job_name, ray_image):
@@ -31,15 +31,15 @@ class KubernetesAPIClient():
             "spec": {
                 "entrypoint": "python /opt/run_task.py",
                 "runtimeEnvYAML": f"""env_vars:
-    {env_string}
+  {env_string}
 pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
 pip:
-    - mlflow==2.5.0 
-    - cryptography==38.0.4 
-    - ksql==0.10.2 
-    - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
-    - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.1
-    - python-dotenv==1.0.0""",
+  - mlflow==2.5.0 
+  - cryptography==38.0.4 
+  - ksql==0.10.2 
+  - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
+  - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.1
+  - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
                     "rayVersion": "2.9.0",
                     "headGroupSpec": {
