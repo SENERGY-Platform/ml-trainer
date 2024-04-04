@@ -1,7 +1,7 @@
-import json 
 import uuid 
 
 from model_trainer.kubernetes_client import KubernetesAPIClient
+from model_trainer.config import Config
 
 class RayKubeJobHandler():
     def __init__(self):
@@ -11,10 +11,11 @@ class RayKubeJobHandler():
         name = experiment_name + str(uuid.uuid4().hex)
         envs = {
             'TASK': "load_shifting",
-            'USER': user_id,
+            'USER_ID': user_id,
             'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': data_settings,
-            'DATA_SOURCE': "s3"
+            'DATA_SOURCE': "s3",
+            'MLFLOW_URL': Config().MLFLOW_URL
         }
         self.k8sclient.create_job(envs, name, ray_image)
 
