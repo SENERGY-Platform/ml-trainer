@@ -15,7 +15,7 @@ class KubernetesAPIClient():
 
     def create_env_string(self, envs): 
         env_string = ""
-        for env, value in envs:
+        for env, value in envs.items():
             env_string += f"{env}: \"{value}\""
         return env_string 
 

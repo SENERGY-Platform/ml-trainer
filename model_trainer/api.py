@@ -69,5 +69,5 @@ def loadshifting():
         task_id = ray_handler.start_load_shifting_job(user_id, experiment_name, data_settings, ray_image)
         return jsonify({'task_id': str(task_id), 'status': 'Processing'})
     except Exception as e:
-        current_app.logger.error("Could not start job: " + e)
-        return jsonify({'error': 'could not start job', 'message': e})
+        current_app.logger.error("Could not start job: " + str(e))
+        return jsonify({'error': 'could not start job', 'message': str(e)})
