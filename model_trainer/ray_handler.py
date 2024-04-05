@@ -8,8 +8,9 @@ class RayKubeJobHandler():
     def __init__(self):
         self.k8sclient = KubernetesAPIClient()
     
-    def start_load_shifting_job(self, experiment_name, user_id, data_settings, ray_image):
+    def start_load_shifting_job(self, user_id, experiment_name, data_settings, ray_image):
         name = experiment_name + str(uuid.uuid4().hex)
+        data_settings['file_name'] = experiment_name
         envs = {
             'TASK': "load_shifting",
             'USER_ID': user_id,
