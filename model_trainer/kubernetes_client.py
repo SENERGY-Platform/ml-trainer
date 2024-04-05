@@ -17,7 +17,7 @@ class KubernetesAPIClient():
     def create_env_string(self, envs): 
         env_string = ""
         for env, value in envs.items():
-            env_string += f"{env}: \"{value}\"\n  "
+            env_string += f"{env}: '{value}'\n  "
         return env_string 
 
     def create_job(self, envs, job_name, ray_image):
