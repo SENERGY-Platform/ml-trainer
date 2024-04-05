@@ -1,4 +1,5 @@
 import uuid 
+import json 
 
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
@@ -13,7 +14,7 @@ class RayKubeJobHandler():
             'TASK': "load_shifting",
             'USER_ID': user_id,
             'EXPERIMENT_NAME': name,
-            'DATA_SETTINGS': data_settings,
+            'DATA_SETTINGS': json.dumps(data_settings),
             'DATA_SOURCE': "s3",
             'MLFLOW_URL': Config().MLFLOW_URL
         }
