@@ -36,9 +36,8 @@ pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
 pip:
   - mlflow==2.5.0 
   - cryptography==38.0.4 
-  - ksql==0.10.2 
   - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
-  - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.5
+  - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@v2.0.12
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
                     "rayVersion": "2.9.0",
@@ -91,7 +90,7 @@ pip:
                             "containers": [
                                 {
                                 "name": "ray-worker",
-                                "image": "rayproject/ray:2.9.0",
+                                "image": ray_image,
                                 "lifecycle": {
                                     "preStop": {
                                     "exec": {
