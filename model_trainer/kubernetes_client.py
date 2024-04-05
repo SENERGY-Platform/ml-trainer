@@ -34,7 +34,6 @@ class KubernetesAPIClient():
   {env_string}
 pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
 pip:
-  - mlflow==2.5.0 
   - cryptography==38.0.4 
   - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
   - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
