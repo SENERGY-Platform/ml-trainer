@@ -62,7 +62,7 @@ def loadshifting():
         return jsonify({'error': 'could not start job', 'message': str(e)})
 
 @train_blueprint.route('/anomaly', methods=['POST'])
-def loadshifting():
+def anomaly():
     user_id = "user"
     request_data = request.get_json()
     experiment_name = request_data['experiment_name'] 
