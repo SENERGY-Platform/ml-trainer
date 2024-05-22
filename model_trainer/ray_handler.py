@@ -13,7 +13,7 @@ class RayKubeJobHandler():
         data_settings['file_name'] = experiment_name
         envs = {
             'TASK': task,
-            'TASK_SETTINGS': task_settings,
+            'TASK_SETTINGS': json.dumps(task_settings),
             'USER_ID': user_id,
             'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': json.dumps(data_settings),
