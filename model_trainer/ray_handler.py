@@ -8,7 +8,7 @@ class RayKubeJobHandler():
     def __init__(self):
         self.k8sclient = KubernetesAPIClient()
     
-    def start_job(self, task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version):
+    def start_job(self, task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source):
         name = experiment_name + "-" + str(uuid.uuid4().hex)
         data_settings['file_name'] = experiment_name
         envs = {
@@ -17,7 +17,7 @@ class RayKubeJobHandler():
             'USER_ID': user_id,
             'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': json.dumps(data_settings),
-            'DATA_SOURCE': "s3",
+            'DATA_SOURCE': data_source,
             'MLFLOW_URL': Config().MLFLOW_URL
         }
         self.k8sclient.create_job(envs, name, ray_image, toolbox_version)

@@ -52,10 +52,11 @@ def loadshifting():
     data_settings = request_data['data_settings']
     ray_image = request_data['ray_image']
     toolbox_version = request_data.get('toolbox_version', "v2.0.16")
+    data_source = 's3'
     task = "load_shifting"
     ray_handler = RayKubeJobHandler()
     try:
-        task_id = ray_handler.start_job(task, None, user_id, experiment_name, data_settings, ray_image, toolbox_version)
+        task_id = ray_handler.start_job(task, None, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source)
         return jsonify({'task_id': str(task_id), 'status': 'Processing'})
     except Exception as e:
         current_app.logger.error("Could not start job: " + str(e))
@@ -71,9 +72,10 @@ def anomaly():
     ray_image = request_data['ray_image']
     toolbox_version = request_data.get('toolbox_version', "v2.0.16")
     task = "anomaly"
+    data_source = request_data['data_source']
     ray_handler = RayKubeJobHandler()
     try:
-        task_id = ray_handler.start_job(task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version)
+        task_id = ray_handler.start_job(task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source)
         return jsonify({'task_id': str(task_id), 'status': 'Processing'})
     except Exception as e:
         current_app.logger.error("Could not start job: " + str(e))
