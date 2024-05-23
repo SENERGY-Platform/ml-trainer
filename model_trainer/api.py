@@ -63,7 +63,7 @@ def loadshifting():
         current_app.logger.error("Could not start job: " + str(e))
         return jsonify({'error': 'could not start job', 'message': str(e)})
 
-@train_blueprint.route('/anomaly', methods=['POST'])
+@train_blueprint.route('/mlfit', methods=['POST'])
 def anomaly():
     user_id = "user"
     request_data = request.get_json()
@@ -72,7 +72,7 @@ def anomaly():
     task_settings = request_data['task_settings']
     ray_image = request_data['ray_image']
     toolbox_version = request_data.get('toolbox_version', "v2.0.16")
-    task = "anomaly"
+    task = "ml_fit"
     data_source = request_data['data_source']
     ray_handler = RayKubeJobHandler()
     try:
