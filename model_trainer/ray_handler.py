@@ -9,7 +9,7 @@ class RayKubeJobHandler():
         self.k8sclient = KubernetesAPIClient()
     
     def start_job(self, task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source):
-        name = experiment_name + "-" + str(uuid.uuid4().hex)
+        name = experiment_name + str(uuid.uuid4().hex)
         envs = {
             'TASK': task,
             'TASK_SETTINGS': json.dumps(task_settings),
