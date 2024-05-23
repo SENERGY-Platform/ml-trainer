@@ -50,6 +50,7 @@ def loadshifting():
     request_data = request.get_json()
     experiment_name = request_data['experiment_name'] 
     data_settings = request_data['data_settings']
+    data_settings['file_name'] = experiment_name
     ray_image = request_data['ray_image']
     toolbox_version = request_data.get('toolbox_version', "v2.0.16")
     data_source = 's3'
