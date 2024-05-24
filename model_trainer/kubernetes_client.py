@@ -22,6 +22,7 @@ class KubernetesAPIClient():
 
     def create_job(self, envs, job_name, ray_image, toolbox_version="v2.0.16"):
         env_string = self.create_env_string(envs)
+        print(f"Set env: {env_string}")
         data = {
             "apiVersion": "ray.io/v1",
             "kind": "RayJob",
@@ -37,7 +38,6 @@ class KubernetesAPIClient():
 pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
 pip:
   - cryptography==38.0.4 
-  - ksql-query-builder @ git+https://github.com/SENERGY-Platform/ksql-query-builder
   - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
