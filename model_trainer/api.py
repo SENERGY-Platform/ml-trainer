@@ -1,20 +1,21 @@
 from flask import Blueprint, jsonify, request, current_app
 
 from model_trainer.ray_handler import RayKubeJobHandler
-from model_trainer.mlflow_handler import MlflowHandler
+from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
 
 config = Config()
 train_blueprint = Blueprint("api", __name__)
 
-#@train_blueprint.route('/train/<job_id>', methods=['GET'])
-#def get_task_status(job_id):
-#    ray_handler = RayHandler(config)
-#    status, return_value = ray_handler.get_job_status(job_id)
-#    response = {'status': status}
-#    if return_value:
-#        response['response'] = return_value
-#    return jsonify(response)
+@train_blueprint.route('/train/<job_id>', methods=['GET'])
+def get_task_status(job_id):
+    ray_handler = KubernetesAPIClient(config)
+    status, msg = ray_handler.get_job_status(job_id)
+    response = {
+        'success': status,
+        'response': msg
+    }
+    return jsonify(response)
     
 @train_blueprint.route('/loadshifting', methods=['POST'])
 def loadshifting():
