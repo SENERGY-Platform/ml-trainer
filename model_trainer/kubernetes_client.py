@@ -6,9 +6,12 @@ from kubernetes.client.rest import ApiException
 PIP_VERSION = "22.0.4"
 PYTHON_VERSION = "3.8.16"
 
+SUCESS = "SUCCEEDED"
+
 class KubernetesAPIClient():
     def __init__(self):
         self.setup_config()
+        self.api_instance = client.CustomObjectsApi()
     
     def setup_config(self):
         config.load_incluster_config()
@@ -20,6 +23,23 @@ class KubernetesAPIClient():
             env_string += f"{env}: '{value}'\n  "
         return env_string 
 
+    def get_job_status(self, job_name):
+        group = 'ray.io' 
+        version = 'v1' 
+        plural = 'rayjobs'
+        namespace = 'trainer' 
+        try:
+            api_response = self.api_instance.get_namespaced_custom_object(group=group, version=version, plural=plural, namespace=namespace, name=job_name)
+            print(api_response)
+            job_status = api_response.jobStatus
+            msg = api_response.status.message
+            job_done = job_status == SUCESS 
+            return job_done, msg
+
+        except ApiException as e:
+            print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)
+            raise(e)
+    
     def create_job(self, envs, job_name, ray_image, toolbox_version="v2.0.16"):
         env_string = self.create_env_string(envs)
         print(f"Set env: {env_string}")
@@ -121,13 +141,12 @@ pip:
             }
         }
 
-        api_instance = client.CustomObjectsApi()
         group = 'ray.io' # str | The custom resource's group name
         version = 'v1' # str | The custom resource's version
         plural = 'rayjobs' # str | The custom resource's plural name. For TPRs this would be lowercase plural kind.
         namespace = 'trainer' # must be same namespace, otherwise RBAC will complain
         try:
-            api_response = api_instance.create_namespaced_custom_object(group=group, version=version, plural=plural, body=data, namespace=namespace)
+            api_response = self.api_instance.create_namespaced_custom_object(group=group, version=version, plural=plural, body=data, namespace=namespace)
             print(api_response)
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)

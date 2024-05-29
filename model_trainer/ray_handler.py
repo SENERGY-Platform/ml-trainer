@@ -20,4 +20,5 @@ class RayKubeJobHandler():
             'MLFLOW_URL': Config().MLFLOW_URL
         }
         self.k8sclient.create_job(envs, name, ray_image, toolbox_version)
+        return name
 

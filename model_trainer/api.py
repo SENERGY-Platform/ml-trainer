@@ -7,32 +7,6 @@ from model_trainer.config import Config
 config = Config()
 train_blueprint = Blueprint("api", __name__)
 
-#@train_blueprint.route('/select', methods=['POST'])
-#def start_select():
-#    request_data = request.get_json()
-#    user_id = "user"
-#    models = request_data['models']
-#    task = request_data['task']
-#    model_artifact_name = request_data['model_artifact_name']
-#    data_settings = request_data['data_settings']
-#    data_source = request_data['data_source']
-#    task_settings = request_data['task_settings']
-#    preprocessor_name = request_data['preprocessor']
-#    metric_for_selection = request_data['selection_metric']
-
-#    if 'experiment_name' not in request_data:
-#        experiment_name = str(uuid.uuid4().hex)
-#    else:
-#        experiment_name = request_data['experiment_name']
-
-#    mlflow_handler = MlflowHandler(config)
-#    experiment_can_be_used, reason = mlflow_handler.experiment_name_can_be_used(experiment_name)
-
-#    if not experiment_can_be_used:
-#        return jsonify({'error': reason})
-
-#    return jsonify({'task_id': str("task_id"), 'status': 'Processing'})
-
 #@train_blueprint.route('/train/<job_id>', methods=['GET'])
 #def get_task_status(job_id):
 #    ray_handler = RayHandler(config)
