@@ -1,6 +1,5 @@
-import uuid 
-
 from flask import Blueprint, jsonify, request, current_app
+import mlflow
 
 from model_trainer.ray_handler import RayKubeJobHandler
 from model_trainer.mlflow_handler import MlflowHandler
@@ -81,3 +80,8 @@ def anomaly():
     except Exception as e:
         current_app.logger.error("Could not start job: " + str(e))
         return jsonify({'error': 'could not start job', 'message': str(e)})
+
+@train_blueprint.route('/model/<model_name>/<version>', methods=['GET'])
+def load_model(model_name, version):
+    mlflow.set_tracking_uri(Config.MLFLOW_URL)
+    load_model(model_name, version)
