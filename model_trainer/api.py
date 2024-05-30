@@ -9,8 +9,8 @@ train_blueprint = Blueprint("api", __name__)
 
 @train_blueprint.route('/job/<job_id>', methods=['GET'])
 def get_task_status(job_id):
-    ray_handler = KubernetesAPIClient()
-    status, msg = ray_handler.get_job_status(job_id)
+    k8s_client = KubernetesAPIClient()
+    status, msg = k8s_client.get_job_status(job_id)
     response = {
         'success': status,
         'response': msg

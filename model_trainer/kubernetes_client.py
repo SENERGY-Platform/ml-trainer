@@ -31,9 +31,9 @@ class KubernetesAPIClient():
         try:
             api_response = self.api_instance.get_namespaced_custom_object(group=group, version=version, plural=plural, namespace=namespace, name=job_name)
             print(api_response)
-            job_status = api_response.jobStatus
-            msg = api_response.status.message
-            job_done = job_status == SUCESS 
+            job_status = api_response['status']
+            msg = job_status.get('message')
+            job_done = job_status['jobStatus'] == SUCESS 
             return job_done, msg
 
         except ApiException as e:
