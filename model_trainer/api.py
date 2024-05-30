@@ -7,9 +7,9 @@ from model_trainer.config import Config
 config = Config()
 train_blueprint = Blueprint("api", __name__)
 
-@train_blueprint.route('/train/<job_id>', methods=['GET'])
+@train_blueprint.route('/job/<job_id>', methods=['GET'])
 def get_task_status(job_id):
-    ray_handler = KubernetesAPIClient(config)
+    ray_handler = KubernetesAPIClient()
     status, msg = ray_handler.get_job_status(job_id)
     response = {
         'success': status,
