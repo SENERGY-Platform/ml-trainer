@@ -7,6 +7,7 @@ PIP_VERSION = "22.0.4"
 PYTHON_VERSION = "3.8.16"
 
 SUCESS = "SUCCEEDED"
+UNKNOWN = "unknown"
 
 class KubernetesAPIClient():
     def __init__(self):
@@ -31,13 +32,20 @@ class KubernetesAPIClient():
         try:
             api_response = self.api_instance.get_namespaced_custom_object(group=group, version=version, plural=plural, namespace=namespace, name=job_name)
             print(api_response)
-            job_status = api_response['status']
-            msg = job_status.get('message')
-            job_done = job_status['jobStatus'] == SUCESS 
-            return job_done, msg
+            job_status_result = api_response['status']
+            msg = job_status_result.get('message')
+            k8s_job_status = job_status_result['jobStatus']
+            job_status = "unknown" 
+            if k8s_job_status == "SUCCEEDED":
+                job_status = "done"
+            if k8s_job_status == "RUNNING":
+                job_status = "running"
+            if k8s_job_status == "ERROR":
+                job_status = "error"
+            return job_status, msg
 
         except ApiException as e:
-            print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)
+            print("Exception when calling CustomObjectsApi->get_cluster_custom_object: %s\n" % e)
             raise(e)
     
     def create_job(self, envs, job_name, ray_image, toolbox_version="v2.0.16"):
