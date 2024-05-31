@@ -60,7 +60,7 @@ class KubernetesAPIClient():
             "spec": {
                 "entrypoint": "python /opt/run_task.py",
                 "shutdownAfterJobFinishes": True,
-                "ttlSecondsAfterFinished": 120,
+                "ttlSecondsAfterFinished": 600,
                 "runtimeEnvYAML": f"""env_vars:
   {env_string}
 pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"

@@ -17,7 +17,8 @@ class RayKubeJobHandler():
             'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': json.dumps(data_settings),
             'DATA_SOURCE': data_source,
-            'MLFLOW_URL': Config().MLFLOW_URL
+            'MLFLOW_URL': Config().MLFLOW_URL,
+            'TOOLBOX_VERSION': toolbox_version
         }
         self.k8sclient.create_job(envs, name, ray_image, toolbox_version)
         return name
