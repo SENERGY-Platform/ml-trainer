@@ -1,15 +1,19 @@
 import uuid 
 import json 
+import base64
 
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
+
+def generate_random_short_id():
+    return base64.b32encode(uuid.uuid4().bytes).decode().replace("=","")
 
 class RayKubeJobHandler():
     def __init__(self):
         self.k8sclient = KubernetesAPIClient()
     
     def start_job(self, task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source):
-        name = experiment_name + str(uuid.uuid4().hex) # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
+        name = experiment_name + generate_random_short_id() # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
         envs = {
             'TASK': task,
             'TASK_SETTINGS': json.dumps(task_settings),

@@ -7,9 +7,6 @@ from model_trainer.exceptions import K8sException
 PIP_VERSION = "22.0.4"
 PYTHON_VERSION = "3.8.16"
 
-SUCESS = "SUCCEEDED"
-UNKNOWN = "unknown"
-
 class KubernetesAPIClient():
     def __init__(self):
         self.setup_config()

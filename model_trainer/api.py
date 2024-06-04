@@ -48,7 +48,7 @@ def loadshifting():
 def anomaly():
     user_id = "user"
     request_data = request.get_json()
-    experiment_name = request_data['experiment_name'] 
+    experiment_name = request_data.get('experiment_name', "") 
     data_settings = request_data['data_settings']
     task_settings = request_data['task_settings']
     ray_image = request_data['ray_image']
