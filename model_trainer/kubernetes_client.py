@@ -1,5 +1,6 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
+from model_trainer.exceptions import K8sException
 
 # - darts==0.24.0 
 
@@ -40,13 +41,13 @@ class KubernetesAPIClient():
                 job_status = "done"
             if k8s_job_status == "RUNNING" or k8s_job_status == "PENDING":
                 job_status = "running"
-            if k8s_job_status == "ERROR":
+            if k8s_job_status == "FAILED":
                 job_status = "error"
             return job_status, msg
 
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->get_cluster_custom_object: %s\n" % e)
-            raise(e)
+            raise(K8sException(e.status, e.body))
     
     def create_job(self, envs, job_name, ray_image, toolbox_version="v2.0.16"):
         env_string = self.create_env_string(envs)

@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request, current_app
 from model_trainer.ray_handler import RayKubeJobHandler
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
+from model_trainer.exceptions import K8sException
 
 config = Config()
 train_blueprint = Blueprint("api", __name__)
@@ -10,13 +11,20 @@ train_blueprint = Blueprint("api", __name__)
 @train_blueprint.route('/job/<job_id>', methods=['GET'])
 def get_task_status(job_id):
     k8s_client = KubernetesAPIClient()
-    status, msg = k8s_client.get_job_status(job_id)
-    response = {
-        'success': status,
-        'response': msg
-    }
-    return jsonify(response)
-    
+    # TODO 404 when exception
+    try:
+        status, msg = k8s_client.get_job_status(job_id)
+        response = {
+            'success': status,
+            'response': msg
+        }
+        return jsonify(response)
+    except K8sException as e:
+        response = {
+            'response': e.body
+        }
+        return response, e.status
+
 @train_blueprint.route('/loadshifting', methods=['POST'])
 def loadshifting():
     user_id = "user"
@@ -53,4 +61,4 @@ def anomaly():
         return jsonify({'task_id': str(task_id), 'status': 'Processing'})
     except Exception as e:
         current_app.logger.error("Could not start job: " + str(e))
-        return jsonify({'error': 'could not start job', 'message': str(e)})
+        return jsonify({'error': 'could not start job', 'message': str(e)}), 500
