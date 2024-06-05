@@ -6,7 +6,7 @@ from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
 
 def generate_random_short_id():
-    return base64.b32encode(uuid.uuid4().bytes).decode().replace("=","")
+    return base64.b32encode(uuid.uuid4().bytes).decode().replace("=","").lower()
 
 class RayKubeJobHandler():
     def __init__(self):
