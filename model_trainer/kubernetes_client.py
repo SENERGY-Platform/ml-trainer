@@ -61,7 +61,7 @@ class KubernetesAPIClient():
                 "ttlSecondsAfterFinished": 600,
                 "runtimeEnvYAML": f"""env_vars:
   {env_string}
-pip_version: "=={PIP_VERSION};python_version=='{PYTHON_VERSION}'"
+pip_version: "=={PIP_VERSION};python_version=={PYTHON_VERSION}"
 pip:
   - cryptography==38.0.4 
   - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
