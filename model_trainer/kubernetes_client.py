@@ -5,7 +5,6 @@ from model_trainer.exceptions import K8sException
 # - darts==0.24.0 
 
 PIP_VERSION = "22.0.4"
-PYTHON_VERSION = "3.9"
 
 class KubernetesAPIClient():
     def __init__(self):
@@ -61,7 +60,7 @@ class KubernetesAPIClient():
                 "ttlSecondsAfterFinished": 600,
                 "runtimeEnvYAML": f"""env_vars:
   {env_string}
-pip_version: "=={PIP_VERSION};python_version=={PYTHON_VERSION}"
+pip_version: "=={PIP_VERSION}"
 pip:
   - cryptography==38.0.4 
   - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
