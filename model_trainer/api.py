@@ -10,7 +10,7 @@ train_blueprint = Blueprint("api", __name__)
 
 def load_common_config_from_request():
     request_data = request.get_json()
-    user_id = request_data("unknown_user")
+    user_id = request_data.get("user_id", "unknown_user")
     experiment_name = request_data.get('experiment_name', "") 
     data_settings = request_data['data_settings']
     task_settings = request_data['task_settings']
