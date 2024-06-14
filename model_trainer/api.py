@@ -62,17 +62,3 @@ def anomaly():
     except Exception as e:
         current_app.logger.error("Could not start job: " + str(e))
         return jsonify({'error': 'could not start job', 'message': str(e)}), 500
-
-@train_blueprint.route('/peak_shaving', methods=['POST'])
-def anomaly():
-    user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version = load_common_config_from_request()
-    request_data = request.get_json()
-    task = "peak_shaving"
-    data_source = request_data['data_source']
-    ray_handler = RayKubeJobHandler()
-    try:
-        task_id = ray_handler.start_job(task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source)
-        return jsonify({'task_id': str(task_id), 'status': 'Processing'})
-    except Exception as e:
-        current_app.logger.error("Could not start job: " + str(e))
-        return jsonify({'error': 'could not start job', 'message': str(e)}), 500

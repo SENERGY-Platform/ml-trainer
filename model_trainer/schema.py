@@ -1,7 +1,6 @@
 from typing import Literal
 
-
-class KafkaSettings(BaseModel):
+class KafkaSettings():
     name: str 
     path_to_time: str
     path_to_value: str 
@@ -12,7 +11,7 @@ class KafkaSettings(BaseModel):
     time_range_value: float
     time_range_level: str
 
-class Job(BaseModel):
+class Job():
     data_source: Literal['kafka', 's3']
     data_settings: KafkaSettings
     toolbox_version: str
