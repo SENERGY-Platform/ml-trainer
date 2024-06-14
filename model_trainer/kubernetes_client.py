@@ -5,7 +5,7 @@ from model_trainer.exceptions import K8sException
 # - darts==0.24.0 
 
 PIP_VERSION = "22.0.4"
-PYTHON_VERSION = "3.8.16"
+PYTHON_VERSION = "3.9"
 
 class KubernetesAPIClient():
     def __init__(self):
