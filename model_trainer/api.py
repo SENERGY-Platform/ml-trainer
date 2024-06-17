@@ -53,8 +53,8 @@ def loadshifting():
 def anomaly():
     user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version = load_common_config_from_request()
     request_data = request.get_json()
-    task = "ml_fit"
     data_source = request_data['data_source']
+    task = request_data['task']
     ray_handler = RayKubeJobHandler()
     try:
         task_id = ray_handler.start_job(task, task_settings, user_id, experiment_name, data_settings, ray_image, toolbox_version, data_source)
