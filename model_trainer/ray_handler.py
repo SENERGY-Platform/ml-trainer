@@ -24,6 +24,6 @@ class RayKubeJobHandler():
             'MLFLOW_URL': Config().MLFLOW_URL,
             'TOOLBOX_VERSION': toolbox_version
         }
-        self.k8sclient.create_job(envs, name, ray_image, toolbox_version)
+        self.k8sclient.create_job(envs, name, ray_image, toolbox_version, task)
         return name
 

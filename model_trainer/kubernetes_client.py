@@ -45,7 +45,7 @@ class KubernetesAPIClient():
             print("Exception when calling CustomObjectsApi->get_cluster_custom_object: %s\n" % e)
             raise(K8sException(e.status, e.body))
     
-    def create_job(self, envs, job_name, ray_image, toolbox_version="v2.0.16"):
+    def create_job(self, envs, job_name, ray_image, toolbox_version, task_name):
         env_string = self.create_env_string(envs)
         print(f"Set env: {env_string}")
         data = {
@@ -63,7 +63,7 @@ class KubernetesAPIClient():
 pip_version: "=={PIP_VERSION}"
 pip:
   - cryptography==38.0.4 
-  - timeseries-toolbox @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
+  - toolbox[data, {task_name}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
                     "rayVersion": "2.9.0",
