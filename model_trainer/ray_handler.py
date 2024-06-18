@@ -24,7 +24,8 @@ class RayKubeJobHandler():
         data_source,
         number_workers,
         ray_version,
-        cpu_worker_limit
+        cpu_worker_limit,
+        memory_worker_limit
     ):
         name = experiment_name + generate_random_short_id() # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
         envs = {
@@ -37,6 +38,6 @@ class RayKubeJobHandler():
             'MLFLOW_URL': Config().MLFLOW_URL,
             'TOOLBOX_VERSION': toolbox_version
         }
-        self.k8sclient.create_job(envs, name, ray_image, toolbox_version, task, number_workers, ray_version, cpu_worker_limit)
+        self.k8sclient.create_job(envs, name, ray_image, toolbox_version, task, number_workers, ray_version, cpu_worker_limit, memory_worker_limit)
         return name
 

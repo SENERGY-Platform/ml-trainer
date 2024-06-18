@@ -54,7 +54,8 @@ class KubernetesAPIClient():
         task_name,
         number_workers,
         ray_version,
-        cpu_worker_limit
+        cpu_worker_limit,
+        memory_worker_limit
     ):
         # See https://docs.ray.io/en/latest/cluster/kubernetes/user-guides/config.html
         env_string = self.create_env_string(envs)
@@ -134,16 +135,17 @@ pip:
                                     "preStop": {
                                     "exec": {
                                         "command": [
-                                        "/bin/sh",
-                                        "-c",
-                                        "ray stop"
+                                            "/bin/sh",
+                                            "-c",
+                                            "ray stop"
                                         ]
                                     }
                                     }
                                 },
                                 "resources": {
                                     "limits": {
-                                        "cpu": cpu_worker_limit
+                                        "cpu": cpu_worker_limit,
+                                        "memory": memory_worker_limit
                                     },
                                     "requests": {
                                         "cpu": cpu_worker_limit # See ray guide, limit should be same as requests as ray will use limit as logical resources for scheduling
