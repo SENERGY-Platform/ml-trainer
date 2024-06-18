@@ -40,7 +40,8 @@ def get_task_status(job_id):
         return jsonify(response)
     except K8sException as e:
         response = {
-            'response': e.body
+            'sucess': 'error',
+            'response': e.response
         }
         return response, e.status
 
