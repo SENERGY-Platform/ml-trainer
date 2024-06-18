@@ -45,7 +45,18 @@ class KubernetesAPIClient():
             print("Exception when calling CustomObjectsApi->get_cluster_custom_object: %s\n" % e)
             raise(K8sException(e.status, e.body))
     
-    def create_job(self, envs, job_name, ray_image, toolbox_version, task_name):
+    def create_job(
+        self, 
+        envs, 
+        job_name, 
+        ray_image, 
+        toolbox_version, 
+        task_name,
+        number_workers,
+        ray_version,
+        cpu_worker_limit
+    ):
+        # See https://docs.ray.io/en/latest/cluster/kubernetes/user-guides/config.html
         env_string = self.create_env_string(envs)
         print(f"Set env: {env_string}")
         data = {
@@ -66,10 +77,12 @@ pip:
   - toolbox[data, {task_name}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
-                    "rayVersion": "2.9.0",
+                    "rayVersion": ray_version, #"2.9.0",
                     "headGroupSpec": {
                         "rayStartParams": {
-                            "dashboard-host": "0.0.0.0"
+                            "dashboard-host": "0.0.0.0",
+                            "num-cpus": "0", # Head node has 0 logical ressources -> no work is scheduled there to guarantee high availability 
+                            "num-gpus": "0"
                         },
                         "template": {
                             "spec": {
@@ -106,9 +119,9 @@ pip:
                     },
                     "workerGroupSpecs": [
                         {
-                        "replicas": 1,
+                        "replicas": number_workers,
                         "minReplicas": 1,
-                        "maxReplicas": 2,
+                        "maxReplicas": 5,
                         "groupName": "small-group",
                         "rayStartParams": {},
                         "template": {
@@ -130,10 +143,10 @@ pip:
                                 },
                                 "resources": {
                                     "limits": {
-                                    "cpu": "1"
+                                        "cpu": cpu_worker_limit
                                     },
                                     "requests": {
-                                    "cpu": "200m"
+                                        "cpu": cpu_worker_limit # See ray guide, limit should be same as requests as ray will use limit as logical resources for scheduling
                                     }
                                 }
                                 }

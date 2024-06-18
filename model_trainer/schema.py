@@ -17,14 +17,8 @@ class KafkaSettings(Schema):
             raise ValidationError(f"Filter Type {value} not allowed")
 
 class MlFitSettings(Schema):
-    use_case = fields.Str()
     model_name = fields.Str()
     model_parameter = fields.Raw()
-
-    @validates("use_case")
-    def validate_data_source(self, value):
-        if value not in ['anomaly', 'peak_shaving']:
-            raise ValidationError(f"ML Use Case {value} not allowed")
 
     @validates("model_name")
     def validate_model_name(self, value):
@@ -47,10 +41,10 @@ class JobAPI(Schema):
 
 # TODO API Schema, Toolbox Schema?
 
-class JobRunningSchema(JobAPI):
-    task_name = fields.Str()
+class RayJobConfig(JobAPI):
+    task = fields.Str()
 
-    @validates("task_name")
-    def validate_task_name(self, value):
-        if value not in ['mlfit', 'load_shifting']:
-            raise ValidationError(f"Job Task {value} not allowed")
+    @validates("task")
+    def validate_task(self, value):
+        if value not in ['anomaly_detection', 'peak_shaving', 'load_shifting']:
+            raise ValidationError(f"ML Use Case {value} not allowed")
