@@ -16,15 +16,15 @@ def load_common_config_from_request():
     task_settings = request_data['task_settings']
     ray_image = request_data['ray_image']
     toolbox_version = request_data.get('toolbox_version', "v2.0.16")
-    return user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version
+    ray_version = request_data.get("ray_version", "2.0.9")
+    return user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version, ray_version
 
 def load_cluster_config():
     request_data = request.get_json()
     cluster = request_data.get("cluster", {})
     number_workers = cluster.get("number_workers", 1)
-    ray_version = cluster.get("ray_version", "2.0.9")
     cpu_worker_limit = cluster.get("cpu_worker_limit", 1)
-    return number_workers, ray_version, cpu_worker_limit
+    return number_workers, cpu_worker_limit
 
 @train_blueprint.route('/job/<job_id>', methods=['GET'])
 def get_task_status(job_id):
@@ -45,8 +45,8 @@ def get_task_status(job_id):
 
 @train_blueprint.route('/loadshifting', methods=['POST'])
 def loadshifting():
-    user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version = load_common_config_from_request()
-    number_workers, ray_version, cpu_worker_limit = load_cluster_config()
+    user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version, ray_version = load_common_config_from_request()
+    number_workers, cpu_worker_limit = load_cluster_config()
     data_settings['file_name'] = experiment_name
     data_source = 's3'
     task = "load_shifting"
@@ -60,8 +60,8 @@ def loadshifting():
 
 @train_blueprint.route('/mlfit', methods=['POST'])
 def mlfit():
-    user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version = load_common_config_from_request()
-    number_workers, ray_version, cpu_worker_limit = load_cluster_config()
+    user_id, experiment_name, data_settings, task_settings, ray_image, toolbox_version, ray_version = load_common_config_from_request()
+    number_workers, cpu_worker_limit = load_cluster_config()
     request_data = request.get_json()
     data_source = request_data['data_source']
     task = request_data['task']
