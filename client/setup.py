@@ -2,7 +2,7 @@
 
 import setuptools
 setuptools.setup(
-      name='trainer_client',
+      name='model_trainer_client',
       version='2.2.75',
       description='Trainer Client',
       author='Hannes Hansen',
