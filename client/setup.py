@@ -10,7 +10,6 @@ setuptools.setup(
       packages=setuptools.find_packages(),
       python_requires='>=3.5.3',
       install_requires=[
-          "requests==2.32.3",
-          "mlflow==2.11.1"
+          "requests==2.32.3"
       ]
 )
