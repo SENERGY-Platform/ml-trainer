@@ -3,7 +3,7 @@
 import setuptools
 setuptools.setup(
       name='model_trainer_client',
-      version='2.2.75',
+      version='2.0.59', # This version must be equal to the git tag in order for pip to recognize updates
       description='Trainer Client',
       author='Hannes Hansen',
       author_email='',
