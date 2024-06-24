@@ -108,11 +108,11 @@ pip:
                                     "resources": {
                                     "limits": {
                                         "cpu": "1",
-                                        #"memory": "500M"
+                                        "memory": "20G"
                                     },
                                     "requests": {
                                         "cpu": "200m",
-                                        #"memory": "500M"
+                                        "memory": "20G"
                                     }
                                     },
                                 }
