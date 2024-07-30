@@ -1,4 +1,4 @@
-FROM python:3.8.16 AS builder
+FROM python:3.9.0 AS builder
 
 WORKDIR /app
 RUN apt-get -y install libc-dev libssl-dev
