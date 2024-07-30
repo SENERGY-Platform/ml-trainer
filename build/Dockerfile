@@ -11,12 +11,12 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Requirements are installed here to ensure they will be cached.
 COPY requirements.txt .
-RUN python3 -m pip install -Ur requirements.txt
+RUN python3 -m pip install -Ur --no-cache-dir requirements.txt
 
 COPY .git .git
 RUN git log -1 --oneline > version.txt
 
-FROM python:3.8.16-slim-bullseye AS api
+FROM python:3.9.0 AS api
 
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONUNBUFFERED 1

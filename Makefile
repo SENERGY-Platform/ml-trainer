@@ -1,5 +1,5 @@
 run_api: 
-	python -m flask --app model_trainer/app run --port=5001
+	fastapi dev model_trainer/app.py --port=5001
 
 run_tests:
 	pytest

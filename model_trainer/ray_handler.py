@@ -4,6 +4,7 @@ import base64
 
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
+from model_trainer.schema import Job 
 
 def generate_random_short_id():
     return base64.b32encode(uuid.uuid4().bytes).decode().replace("=","").lower()
@@ -14,30 +15,19 @@ class RayKubeJobHandler():
     
     def start_job(
         self, 
-        task, 
-        task_settings, 
-        user_id, 
-        experiment_name, 
-        data_settings, 
-        ray_image, 
-        toolbox_version, 
-        data_source,
-        number_workers,
-        ray_version,
-        cpu_worker_limit,
-        memory_worker_limit
+        job: Job
     ):
-        name = experiment_name + generate_random_short_id() # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
+        name = generate_random_short_id() # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
         envs = {
-            'TASK': task,
-            'TASK_SETTINGS': json.dumps(task_settings),
-            'USER_ID': user_id,
+            'TASK': job.task,
+            'TASK_SETTINGS': json.dumps(job.task_settings),
+            'USER_ID': job.user_id,
             'EXPERIMENT_NAME': name,
-            'DATA_SETTINGS': json.dumps(data_settings),
-            'DATA_SOURCE': data_source,
+            'DATA_SETTINGS': json.dumps(job.data_settings),
+            'DATA_SOURCE': job.data_source,
             'MLFLOW_URL': Config().MLFLOW_URL,
-            'TOOLBOX_VERSION': toolbox_version
+            'TOOLBOX_VERSION': job.toolbox_version
         }
-        self.k8sclient.create_job(envs, name, ray_image, toolbox_version, task, number_workers, ray_version, cpu_worker_limit, memory_worker_limit)
+        self.k8sclient.create_job(envs, name, job)
         return name
 

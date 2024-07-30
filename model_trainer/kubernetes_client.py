@@ -1,6 +1,7 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 from model_trainer.exceptions import K8sException
+from model_trainer.schema import Job 
 
 # - darts==0.24.0 
 
@@ -49,13 +50,7 @@ class KubernetesAPIClient():
         self, 
         envs, 
         job_name, 
-        ray_image, 
-        toolbox_version, 
-        task_name,
-        number_workers,
-        ray_version,
-        cpu_worker_limit,
-        memory_worker_limit
+        job: Job
     ):
         # See https://docs.ray.io/en/latest/cluster/kubernetes/user-guides/config.html
         env_string = self.create_env_string(envs)
@@ -75,10 +70,10 @@ class KubernetesAPIClient():
 pip_version: "=={PIP_VERSION}"
 pip:
   - cryptography==38.0.4 
-  - toolbox[data, {task_name}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{toolbox_version}
+  - toolbox[data, {job.task_name}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{job.toolbox_version}
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
-                    "rayVersion": ray_version, #"2.9.0",
+                    "rayVersion": job.ray_version, #"2.9.0",
                     "headGroupSpec": {
                         "rayStartParams": {
                             "dashboard-host": "0.0.0.0",
@@ -90,7 +85,7 @@ pip:
                                 "containers": [
                                 {
                                     "name": "ray-head",
-                                    "image": ray_image,
+                                    "image": job.ray_image,
                                     "ports": [
                                     {
                                         "containerPort": 6379,
@@ -122,7 +117,7 @@ pip:
                     },
                     "workerGroupSpecs": [
                         {
-                        "replicas": number_workers,
+                        "replicas": job.cluster.number_workers,
                         "minReplicas": 1,
                         "maxReplicas": 5,
                         "groupName": "small-group",
@@ -132,7 +127,7 @@ pip:
                             "containers": [
                                 {
                                 "name": "ray-worker",
-                                "image": ray_image,
+                                "image": job.ray_image,
                                 "lifecycle": {
                                     "preStop": {
                                     "exec": {
@@ -146,11 +141,11 @@ pip:
                                 },
                                 "resources": {
                                     "limits": {
-                                        "cpu": cpu_worker_limit,
-                                        "memory": memory_worker_limit
+                                        "cpu": job.cluster.cpu_worker_limit,
+                                        "memory": job.cluster.memory_worker_limit
                                     },
                                     "requests": {
-                                        "cpu": cpu_worker_limit # See ray guide, limit should be same as requests as ray will use limit as logical resources for scheduling
+                                        "cpu": job.cluster.cpu_worker_limit # See ray guide, limit should be same as requests as ray will use limit as logical resources for scheduling
                                     }
                                 }
                                 }
@@ -172,4 +167,4 @@ pip:
             print(api_response)
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->create_cluster_custom_object: %s\n" % e)
-            raise(e)
+            raise(K8sException(e.status, e.body))
