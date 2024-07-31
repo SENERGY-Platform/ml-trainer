@@ -11,7 +11,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Requirements are installed here to ensure they will be cached.
 COPY requirements.txt .
-RUN python3 -m pip install -Ur --no-cache-dir requirements.txt
+RUN python3 -m pip install -Ur requirements.txt
 
 COPY .git .git
 RUN git log -1 --oneline > version.txt
