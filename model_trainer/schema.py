@@ -45,7 +45,7 @@ class Cluster(BaseModel):
 
 class Job(BaseModel):
     task: Literal['anomaly_detection', 'load_shifting', 'peak_shaving']
-    task_settings: Union[MlFitSettings, EmptyTaskSettings]
+    task_settings: Optional[MlFitSettings] = None
     data_source: Literal['kafka', 's3', 'dummy', 'timescale']
     data_settings: Union[Kafka, S3]
     toolbox_version: str

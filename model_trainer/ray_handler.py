@@ -19,13 +19,15 @@ class RayKubeJobHandler():
         name = generate_random_short_id()
         envs = {
             'TASK': job.task,
-            'TASK_SETTINGS': json.dumps(job.task_settings),
             'USER_ID': job.user_id,
+            'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': json.dumps(job.data_settings),
             'DATA_SOURCE': job.data_source,
             'MLFLOW_URL': Config().MLFLOW_URL,
             'TOOLBOX_VERSION': job.toolbox_version
         }
+        if job.task_settings:
+            envs['TASK_SETTINGS'] = json.dumps(job.task_settings)
         self.k8sclient.create_job(envs, name, job)
         return name
 
