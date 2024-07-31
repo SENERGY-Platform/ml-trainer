@@ -1,13 +1,12 @@
 import uuid 
 import json 
-import base64
 
 from model_trainer.kubernetes_client import KubernetesAPIClient
 from model_trainer.config import Config
 from model_trainer.schema import Job 
 
 def generate_random_short_id():
-    return base64.b32encode(uuid.uuid4().bytes).decode().replace("=","").lower()
+    return uuid.uuid4().hex
 
 class RayKubeJobHandler():
     def __init__(self):
@@ -17,12 +16,11 @@ class RayKubeJobHandler():
         self, 
         job: Job
     ):
-        name = generate_random_short_id() # Dont use `-` here as it results in errors with KSQL where the name is used as stream name
+        name = generate_random_short_id()
         envs = {
             'TASK': job.task,
             'TASK_SETTINGS': json.dumps(job.task_settings),
             'USER_ID': job.user_id,
-            'EXPERIMENT_NAME': name,
             'DATA_SETTINGS': json.dumps(job.data_settings),
             'DATA_SOURCE': job.data_source,
             'MLFLOW_URL': Config().MLFLOW_URL,
