@@ -18,9 +18,9 @@ class TrainerClient():
 
         return job_status == 'done'
 
-    def start_training(self, job_request, endpoint):
+    def start_training(self, job_request):
         self.logger.debug(f"Start online training")
-        train_url = self.url + "/" + endpoint
+        train_url = self.url + "/job"
         res = requests.post(train_url, json=job_request)
         self.logger.debug(f"ML Trainer Response: {res.text}")
         if res.status_code != 200:
