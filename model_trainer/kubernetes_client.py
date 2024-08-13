@@ -70,7 +70,7 @@ class KubernetesAPIClient():
 pip_version: "=={PIP_VERSION}"
 pip:
   - cryptography==38.0.4 
-  - toolbox[data, {job.task_name}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{job.toolbox_version}
+  - toolbox[data, {job.task}] @ git+https://github.com/SENERGY-Platform/timeseries-toolbox@{job.toolbox_version}
   - python-dotenv==1.0.0""",
                 "rayClusterSpec": {
                     "rayVersion": job.ray_version, #"2.9.0",
