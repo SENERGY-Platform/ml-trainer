@@ -31,7 +31,7 @@ class KubernetesAPIClient():
             api_response = self.api_instance.get_namespaced_custom_object(group=group, version=version, plural=plural, namespace=namespace, name=job_name)
             print(api_response)
             job_status_result = api_response.get('status', {'jobStatus': "RUNNING"}) # Sometimes the status field is missing... assume running
-            msg = job_status_result.get('message')
+            msg = job_status_result.get('message', '')
             k8s_job_status = job_status_result['jobStatus']
             job_status = "unknown" 
             if k8s_job_status == "SUCCEEDED":
