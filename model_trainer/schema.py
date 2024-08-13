@@ -50,6 +50,7 @@ class Job(BaseModel):
     data_settings: Union[Kafka, S3]
     toolbox_version: str
     ray_image: str
+    ray_version: str
     user_id: str
     cluster: Cluster
 
@@ -86,7 +87,8 @@ class Job(BaseModel):
                     "time_range_level": "h"
                 },
                 "toolbox_version": "v2.2.12",
-                "ray_image": "ghcr.io/senergy-platform/ray:v0.0.8"
+                "ray_image": "ghcr.io/senergy-platform/ray:v0.0.8",
+                "ray_version": "2.24.0"
             }]
         }
     }
