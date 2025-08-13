@@ -86,9 +86,9 @@ class Job(BaseModel):
                     "time_range_value": "13",
                     "time_range_level": "h"
                 },
-                "toolbox_version": "v2.2.12",
-                "ray_image": "ghcr.io/senergy-platform/ray:v0.0.8",
-                "ray_version": "2.24.0"
+                "toolbox_version": "v2.2.90",
+                "ray_image": "ghcr.io/senergy-platform/ray:v0.0.13",
+                "ray_version": "2.41.0"
             }]
         }
     }
