@@ -1,2 +1,2 @@
 #!/bin/bash
-fastapi run model_trainer/app.py --port 5000
+python -m uvicorn model_trainer.app:app --host 0.0.0.0 --port 5000
