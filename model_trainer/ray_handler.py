@@ -16,7 +16,7 @@ class RayKubeJobHandler():
         self, 
         job: Job
     ):
-        name = generate_random_short_id()
+        name = "ray-" + generate_random_short_id()
         envs = {
             'TASK': job.task,
             'USER_ID': job.user_id,
