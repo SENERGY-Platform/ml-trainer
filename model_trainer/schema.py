@@ -19,6 +19,13 @@ class S3(BaseModel):
     aws_access: str
     file_name: str
     
+class Timescale(BaseModel):
+    connection_string: Optional[str]
+    device_id: str
+    service_id: str
+    field: str
+    time_range: str = "1d"
+    
 class ModelParameter(BaseModel):
     window_length: int
     batch_size: int
@@ -47,7 +54,7 @@ class Job(BaseModel):
     task: Literal['anomaly_detection', 'load_shifting', 'peak_shaving']
     task_settings: Optional[MlFitSettings] = None
     data_source: Literal['kafka', 's3', 'dummy', 'timescale']
-    data_settings: Union[Kafka, S3]
+    data_settings: Union[Kafka, S3, Timescale]
     toolbox_version: str
     ray_image: str
     ray_version: str
