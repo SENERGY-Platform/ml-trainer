@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, field_validator
 from typing import Literal, Union, Any, Optional
 
 class Kafka(BaseModel):
@@ -20,11 +20,15 @@ class S3(BaseModel):
     file_name: str
     
 class Timescale(BaseModel):
-    connection_string: Optional[str]
+    connection_string: Optional[str] = None
     device_id: str
     service_id: str
     field: str
     time_range: str = "1d"
+
+
+class DummyDataSettings(BaseModel):
+    pass
     
 class ModelParameter(BaseModel):
     window_length: int
@@ -54,12 +58,30 @@ class Job(BaseModel):
     task: Literal['anomaly_detection', 'load_shifting', 'peak_shaving']
     task_settings: Optional[MlFitSettings] = None
     data_source: Literal['kafka', 's3', 'dummy', 'timescale']
-    data_settings: Union[Kafka, S3, Timescale]
+    data_settings: Union[Kafka, S3, Timescale, DummyDataSettings]
     toolbox_version: str
     ray_image: str
     ray_version: str
     user_id: str
     cluster: Cluster
+
+    @field_validator('data_settings', mode='before')
+    @classmethod
+    def validate_data_settings_for_source(cls, value: Any, info):
+        source = info.data.get('data_source')
+        source_model_mapping = {
+            'kafka': Kafka,
+            's3': S3,
+            'timescale': Timescale,
+            'dummy': DummyDataSettings,
+        }
+
+        model = source_model_mapping.get(source)
+        if model is None:
+            return value
+        if isinstance(value, model):
+            return value
+        return model.model_validate(value)
 
     model_config = {
         "json_schema_extra": {
